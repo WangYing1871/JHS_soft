@@ -13,6 +13,8 @@ struct cluster_{
   typedef cluster_ self_t;
   std::pair<size_t,size_t> m_range;
   std::vector<_tp> m_data;
+
+  uint32_t sum_adc;
   size_t m_hole_no = 0;
   size_t m_hits_no = 0;
 
@@ -90,6 +92,19 @@ public:
     }
   }
 
+  template <class _fun_t>
+  double cog(_fun_t&& fun) const{
+    size_t sum = 0;
+    size_t adc_sum = 0;
+    std::size_t index=0;
+    for (size_t i=m_range.first; i<m_range.second; ++i){
+      auto adc = fun(m_data[index++]);
+      sum += adc*i;
+      adc_sum += adc;
+    }
+    return adc_sum==0 ? std::nan("") : sum/(double)adc_sum;
+  }
+
 };
 
 #include <list>
@@ -114,18 +129,14 @@ public:
       ){
     m_data.clear();
     for (auto iter = begin; iter != end;){
-      //if (func(*iter))){
       if (judge(*iter,std::forward<_args>(_params)...)){
-            //info_out(std::distance(begin,iter));
         if (iter==std::prev(end,1)){
           m_data.emplace_back(cluster_t(begin,iter,iter+1,tran));
           iter++;
           continue;
         }
         for (auto iter_sub = iter+1; iter_sub !=end; ++iter_sub){
-            //info_out(std::distance(begin,iter_sub));
           if (!judge(*iter_sub,std::forward<_args>(_params)...)){ 
-            //info_out(std::distance(begin,iter_sub));
             m_data.emplace_back(cluster_t(begin,iter,iter_sub,tran)); iter = iter_sub; break;}
           if (std::distance(iter_sub,end)==1){
             m_data.emplace_back(cluster_t(begin,iter,iter_sub+1,tran)); iter = end; break;

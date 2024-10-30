@@ -38,4 +38,7 @@ file(GLOB headers
 set(exec_name "main")
 add_executable(${exec_name} main.cpp ${sources} ${headers})
 target_link_libraries(${exec_name} ${ROOT_LIBRARIES})
+if (NOT EXISTS "argv.ini")
+  file(COPY "${PROJECT_SOURCE_DIR}/calc/argv.ini" DESTINATION "./")
+endif()
 #target_link_libraries(${exec_name} ${ROOT_LIBRARIES} Boost::timer)

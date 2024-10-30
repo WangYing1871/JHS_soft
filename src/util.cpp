@@ -1,4 +1,9 @@
 #include "util.hpp"
+#include <chrono>
+namespace{
+auto const& format00 = [](std::size_t v)->std::string{
+  return v<10 ? std::string("0")+std::to_string(v) : std::to_string(v); };
+}
 
 namespace util{
 
@@ -124,6 +129,24 @@ std::string terminal_color::gen() const{
     + std::string{"m"}
     ;
 }
+std::string time_to_str(){
+  using namespace std::chrono;
+  system_clock::time_point tp_now = system_clock::now();
+  system_clock::duration dsp = tp_now.time_since_epoch();
+  time_t msp = duration_cast<microseconds>(dsp).count();
+  time_t sse = msp/1000000;
+  std::tm ct = *std::localtime(&sse);
+  std::stringstream sstr;
+  sstr<<1900 + ct.tm_year << "-"<<1+ ct.tm_mon << "-" << ct.tm_mday
+    <<"_"<<format00(ct.tm_hour)<<"-"<<format00(ct.tm_min)<<"-"<<format00(ct.tm_sec)<<"_"<< msp%1000000;
+  return sstr.str(); }
 
 
+}
+
+#include <numeric>
+namespace util{
+void cluster_comp(cluster& v){
+  v.strips = v.range.second-v.range.first;
+  v.sum_amp = std::accumulate(v.amp.begin(),v.amp.end(),0); }
 }

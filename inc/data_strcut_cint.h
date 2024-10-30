@@ -21,6 +21,9 @@ struct cluster : public TObject{
   std::pair<int,int> range;
   std::vector<uint16_t> amp;
   std::vector<int> amp_time;
+  std::size_t strips;
+  uint16_t sum_amp;
+
 public:
   //cluster() = default;
   //~cluster() noexcept = default;

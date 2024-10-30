@@ -10,14 +10,15 @@ struct wave_handler{
   }
 public:
 };
+
 struct wave_t{
   bool _is_calc = false;
   int strip_id;
-  float mean;
-  float sigma;
-  std::vector<uint16_t> wave;
-  uint16_t peak;
-  int peak_position;
+  float mean=0;
+  float sigma=0;
+  uint16_t* wave=nullptr;
+  uint16_t peak=0;
+  int peak_position=0;
 };
 
 #endif

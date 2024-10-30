@@ -22,6 +22,7 @@
 #include "TTree.h"
 #include "TH1I.h"
 #include "TH1F.h"
+#include "TH2D.h"
 #include "TF1.h"
 #include "TSystem.h"
 
@@ -34,9 +35,11 @@
 static std::size_t x_strips = 375;
 static std::size_t y_strips = 375;
 
-uint16_t make_id(uint8_t fec_id, uint8_t channel_id){ return (fec_id<<8) + channel_id; }
-uint32_t make_det_id(uint16_t isx, uint16_t channel_id){ return (isx<<16) + channel_id; }
-std::pair<uint16_t,uint16_t> get_dec_id(uint32_t id){
+inline uint16_t make_id(uint8_t fec_id, uint8_t channel_id){ return (fec_id<<8) + channel_id; }
+inline std::pair<uint8_t,uint8_t> get_fec_id(uint16_t id){
+  return std::make_pair(uint16_t(id>>8), uint16_t(id&0xFF)); }
+inline uint32_t make_det_id(uint16_t isx, uint16_t channel_id){ return (isx<<16) + channel_id; }
+inline std::pair<uint16_t,uint16_t> get_dec_id(uint32_t id){
   return std::make_pair(uint16_t(id>>16), uint16_t(id&0xFFFF)); }
   
 void hit_positon(entry_new* entry
@@ -44,55 +47,81 @@ void hit_positon(entry_new* entry
     ,std::unordered_map<uint16_t,std::pair<float,float>> const& pmap
     ,TClonesArray* storex
     ,TClonesArray* storey
+    ,TFile* wave_view_file=nullptr
+// FIXME
+    ,TH2D* hitmap=nullptr
+    ,TH1I* spectrum_x=nullptr
+    ,TH1I* spectrum_y=nullptr
+    ,TH1I* spectrum_xy=nullptr
     ){
 
+  //for(auto&& [x,y] : f2dmap){
+  //  std::cout<<x<<" "<<y<<std::endl;
+  //}
+
   std::vector<wave_t> detx(x_strips), dety(y_strips);
+
+  //uint32_t sumx=0, sumy=0, sumxy=0;
+
+  
   for (int j=0; j<entry->global_ids.size(); ++j){
     auto x = entry->global_ids.at(j);
     auto det_channel_id = get_dec_id(f2dmap.at(x));
     auto& ref = entry->adcs[j];
+    //uint16_t max_adc = *std::max_element(ref.begin(),ref.end());
+
     if (det_channel_id.first==0){
       if (det_channel_id.second>x_strips-1){
       }
       else{
+        //sumx += max_adc;
+
         auto& wave_ref = detx.at(det_channel_id.second);
         wave_ref.strip_id = det_channel_id.second;
         wave_ref.mean = pmap.at(x).first;
         wave_ref.sigma = pmap.at(x).second;
-        wave_ref.wave.resize(ref.size());
-        std::copy(ref.begin(),ref.end(),wave_ref.wave.begin());
+        wave_ref.wave = ref.data();
       }
     }
     if (det_channel_id.first==1){
       if (det_channel_id.second>y_strips-1){
       }
       else{
+       // sumy += max_adc;
+
         auto& wave_ref = dety.at(det_channel_id.second);
         wave_ref.strip_id = det_channel_id.second;
         wave_ref.mean = pmap.at(x).first;
         wave_ref.sigma = pmap.at(x).second;
-        wave_ref.wave.resize(ref.size());
-        std::copy(ref.begin(),ref.end(),wave_ref.wave.begin());
+        wave_ref.wave = ref.data();
       }
     }
-    std::stringstream sstr("");
-    sstr<<"wave"<<det_channel_id.first<<"-"<<det_channel_id.second;
-    TH1F his(sstr.str().c_str(),sstr.str().c_str(),1024,0,1024);
-    for (int i=0; i<ref.size(); ++i){
-      his.SetBinContent(i+1,ref[i]);
-    }
-    his.Write();
-  } 
-  float offset = 3.;
-  auto const& judge_threshold = [](wave_t& v, float offset)->bool{
-    if(v.mean>=1.e-3 && v.sigma>=1.e-3 && !v.wave.empty()){
-      uint16_t thr = std::round(offset*v.sigma);
-      auto max = std::max_element(v.wave.begin(),v.wave.end());
 
+    //sumxy += max_adc;
+
+
+    //std::stringstream sstr("");
+    //sstr<<"wave"<<det_channel_id.first<<"-"<<det_channel_id.second;
+    //TH1F his(sstr.str().c_str(),sstr.str().c_str(),1024,0,1024);
+    //for (int i=0; i<ref.size(); ++i){
+    //  his.SetBinContent(i+1,ref[i]);
+    //}
+    //his.Write();
+  } 
+
+  //std::cout<<sumx<<" "<<sumy<<" "<<sumxy<<"\n";
+
+
+
+  float offset = 
+  auto const& judge_threshold = [](wave_t& v, float offset)->bool{
+    if(v.mean>=1.e-3 && v.sigma>=1.e-3 && v.wave){
+      uint16_t thr = std::round(offset*v.sigma);
+      auto max = std::max_element(v.wave,v.wave+1024);
       //FIXME
       v._is_calc = true;
       v.peak = *max;
-      v.peak_position = std::distance(v.wave.begin(),max);
+      v.peak_position = std::distance(v.wave,max);
       return *max-v.mean>=thr;
     }
     return false;
@@ -101,7 +130,7 @@ void hit_positon(entry_new* entry
   auto const& get_char = [](wave_t const& v){
     wave_char ret;
     if (v._is_calc){
-      ret.peak = v.peak;
+      ret.peak = v.peak-std::floor(v.mean);
       ret.peak_position = v.peak_position;
     }
     return ret;
@@ -111,6 +140,11 @@ void hit_positon(entry_new* entry
       ,judge_threshold
       ,get_char
       ,offset);
+
+  double hitx, hity;
+  uint16_t edepx, edepy, edepxy;
+
+  auto const& get_max = [](wave_char const& v)->uint16_t{ return v.peak; };
 
   std::size_t index=0;
   if (storex){
@@ -125,10 +159,13 @@ void hit_positon(entry_new* entry
         store->amp[i] = iter->m_data[i].peak;
         store->amp_time[i] = iter->m_data[i].peak_position;
       }
+      util::cluster_comp(*store);
       index++;
+
+      hitx = iter->cog(get_max);
+      edepx = store->sum_amp;
     }
   }
-  //info_out(clusters_x.m_data.size());
   clusters_y.calc(dety.begin(),dety.end()
       ,judge_threshold
       ,get_char
@@ -136,7 +173,7 @@ void hit_positon(entry_new* entry
 
   index=0;
   if (storey){
-    info_out(clusters_y.m_data.size());
+    //info_out(clusters_y.m_data.size());
     for (auto iter = clusters_y.m_data.begin(); iter!=clusters_y.m_data.end(); ++iter){
       new ((*storey)[index]) cluster();
       auto* store = (cluster*)storey->At(index);
@@ -148,14 +185,22 @@ void hit_positon(entry_new* entry
         store->amp[i] = iter->m_data[i].peak;
         store->amp_time[i] = iter->m_data[i].peak_position;
       }
+      util::cluster_comp(*store);
+
+      
       index++;
+      hity = iter->cog(get_max);
+      edepy = store->sum_amp;
     }
   }
-
-
-
-
-  //gFile->Write();
+  if (clusters_x.m_data.size()==1 && clusters_y.m_data.size()==1){
+    std::cout<<hitx<<" "<<hity<<std::endl;
+    if (spectrum_x) spectrum_x->Fill(edepx);
+    if (spectrum_y) spectrum_y->Fill(edepy);
+    if (spectrum_xy) spectrum_xy->Fill(edepx+edepy);
+    if (hitmap) hitmap->Fill(hitx,hity);
+  }
+  
 }
 
 
@@ -331,11 +376,14 @@ void generate_mis(std::string const& path){
 
 using std::cout; using std::endl; using std::string; using std::vector;
 int main(int argc, char* argv[]){
+step0:
   {
+    auto argv_map = util::read_argv("unpack");
+    if (argv_map.find("Enable")==argv_map.end() || argv_map.at("Enable")!="T")
+      goto step1;
     TTree* data_tree = new TTree("CollectionTree","CollectionTree");
     entry_new entry_buffer;
     data_tree->Branch("data",std::addressof(entry_buffer));
-    auto argv_map = util::read_argv("unpack");
     std::string dat_name=argv_map["filename"];
     std::string entry_out_file = dat_name.substr(
         0,dat_name.find_last_of("."))+"_entry.root";
@@ -370,14 +418,19 @@ int main(int argc, char* argv[]){
     delete[] data;
     std::cout<<"Raw Root Store: "<<entry_out_file<<"\n";
   }
+
+step1:
   {
+    auto argv_map = util::read_argv("config");
+    if (argv_map.find("Enable")==argv_map.end() || argv_map.at("Enable")!="T")
+      goto step2;
     typedef typename util::terminal_color tc;
     std::cout<<util::terminal_color(
         tc::display_mode::k_underline
         ,tc::f_color::k_white
         ,tc::b_color::k_blue)
       <<"CONFIG and PRESTAL" <<util::terminal_reset() <<std::endl;
-    auto argv_map = util::read_argv("config");
+
     auto file_replace = util::read_argv("self-def");
     tt_map.clear();
     compres_table.clear();
@@ -419,7 +472,7 @@ int main(int argc, char* argv[]){
     }
     std::string entry_out_file=argv_map["filename"];
     TFile* rfin = new TFile(entry_out_file.c_str());
-    auto* fout = new TFile("generate_config.root","recreate");
+    auto* fout = new TFile("baseline.root","recreate");
     auto* data_tree  = static_cast<TTree*>(rfin->Get("CollectionTree"));
     entry_new* entry_buffer_ptr = new entry_new;
     data_tree->SetBranchAddress("data",std::addressof(entry_buffer_ptr));
@@ -430,7 +483,8 @@ int main(int argc, char* argv[]){
       for (int j=0; j<entry_buffer_ptr->global_ids.size(); ++j){
         int x = entry_buffer_ptr->global_ids.at(j);
         if (baseline_map.find(x)==baseline_map.end()){
-          std::stringstream sstr(""); sstr<<"baseline-"<<x;
+          std::stringstream sstr("");
+          sstr<<"baseline-"<<(int)(x>>8)<<"_"<<(int)(x&0xFF);
           auto const& ref = entry_buffer_ptr->adcs[j];
           uint16_t min = *util::min_element(std::begin(ref),std::end(ref));
           uint16_t max = *util::max_element(std::begin(ref),std::end(ref));
@@ -443,14 +497,14 @@ int main(int argc, char* argv[]){
     fout->cd();
     std::unordered_map<int,std::pair<float,float>> mean_and_rms;
     std::string prestal_name = "prestal.txt";
+    if (argv_map.find("prestal_path") != argv_map.end())
+      prestal_name = argv_map.at("prestal_path");
+    info_out(prestal_name);
     std::ofstream prestal_txt(prestal_name.c_str());
-
-
-
-
-
-
-
+    prestal_txt<<"#"<<"Prestal File V0.0.1\t"<<util::time_to_str()<<"\n";
+    prestal_txt<<"#"<<"Generate by "<<entry_out_file<<"\n";
+    prestal_txt<<"#"<<"fecid channelid mean sigma chi2/ndf\n";
+    
     for (auto iter = baseline_map.begin(); iter != baseline_map.end(); ++iter) {
       TF1 f_gaus("f_gaus","gaus"
           ,iter->second->GetMean()-3*iter->second->GetRMS()
@@ -458,7 +512,10 @@ int main(int argc, char* argv[]){
       iter->second->Fit(&f_gaus,"RQ");
       mean_and_rms[iter->first].first=iter->second->GetMean();
       mean_and_rms[iter->first].second=iter->second->GetRMS();
-      prestal_txt<<iter->first<<" "<<f_gaus.GetParameter(1)<<" "<<f_gaus.GetParameter(2)<<"\n";
+      prestal_txt<<(int)get_fec_id(iter->first).first<<" "<<(int)get_fec_id(iter->first).second
+        <<" "<<f_gaus.GetParameter(1)<<" "<<f_gaus.GetParameter(2)
+        <<" "<<f_gaus.GetChisquare()/f_gaus.GetNDF()
+        <<"\n";
     }
     prestal_txt.close();
     generate_configs(argv_map["path"],mean_and_rms,std::stof(argv_map["sigma-compres"]));
@@ -483,8 +540,11 @@ int main(int argc, char* argv[]){
     delete entry_buffer_ptr;
   }
 
+step2:
   {
     auto argv = util::read_argv("map");
+    if (argv.find("Enable")==argv.end() || argv.at("Enable")!="T")
+      goto step3;
     if (argv.find("mapname") == argv.end()){
       std::cerr<<"[ERROR] No access map name"<<std::endl;
       return -1; }
@@ -502,6 +562,7 @@ int main(int argc, char* argv[]){
         fec2det_map[make_id(uint8_t(a),uint8_t(b))] = make_det_id(uint16_t(c),uint16_t(d));
       }
     }
+    //info_out(fec2det_map.size());
 
     std::unordered_map<uint16_t,std::pair<float,float>> prestal_map;
     std::string prestal_file = argv["prestal"];
@@ -516,12 +577,15 @@ int main(int argc, char* argv[]){
       util::trim_space(sbuf);
       if(!sbuf.empty() && sbuf[0] != '#'){
         std::stringstream sstr(sbuf.c_str());
-        int a; float b, c;
-        sstr>>a>>b>>c;
-        prestal_map[a]=std::make_pair(b,c);
+        int a, d; float b, c,e;
+        sstr>>a>>d>>b>>c>>e;
+
+        //std::cout<<a<<" "<<d<<" "<<b<<" "<<c<<" "<<e<<std::endl;
+        prestal_map[make_id(uint8_t(a),uint8_t(d))]=std::make_pair(b,c);
       }
     }
     prestal_fin.close();
+
     std::string root_file_name=argv["filename"];
     entry_new* entry_buffer_ptr = new entry_new;
 
@@ -544,15 +608,31 @@ int main(int argc, char* argv[]){
     cluster_y->BypassStreamer();
 
 
+    auto* hitmap = new TH2D("hitmap","hitmap",3750,0,375,3750,0,375);
+    auto* spectrum_x = new TH1I("spectrum_x","spectrum_x",10000,0,10000);
+    auto* spectrum_y = new TH1I("spectrum_y","spectrum_y",10000,0,10000);
+    auto* spectrum_xy = new TH1I("spectrum_xy","spectrum_xy",20000,0,20000);
+
+
     for (long long i=0; i<data_tree->GetEntries(); ++i){
       data_tree->GetEntry(i);
       cluster_x->Clear();
       cluster_y->Clear();
       hit_positon(entry_buffer_ptr,fec2det_map,prestal_map
-          ,cluster_x,cluster_y);
+          ,cluster_x,cluster_y
+          ,nullptr
+          ,hitmap
+          ,spectrum_x
+          ,spectrum_y
+          ,spectrum_xy
+          );
       tree->Fill();
       //break;
     }
+    hitmap->SaveAs("hitmap.root");
+    spectrum_x->SaveAs("spectrum_x.root");
+    spectrum_y->SaveAs("spectrum_y.root");
+    spectrum_xy->SaveAs("spectrum_xy.root");
 
     fout->cd();
     tree->Write();
@@ -567,6 +647,8 @@ int main(int argc, char* argv[]){
       <<"fec2det MAP" <<util::terminal_reset() <<std::endl;
     std::cout<<"Reco Root Store: "<<fout_name<<"\n";
   }
+
+step3:
 
   return 0;
 }

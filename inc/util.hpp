@@ -24,6 +24,7 @@
 //  <<" alignof:"<<alignof(decltype(x))<<std::endl;
 //#endif
 namespace util{
+std::string time_to_str();
  
 namespace math{
 double gaus(double* x,double* p);
@@ -282,5 +283,10 @@ inline std::ostream& operator<<(std::ostream& os, terminal_color const& b){ retu
 inline std::ostream& operator<<(std::ostream& os, terminal_color&& b){ return os<<b.gen().c_str(); }
 struct terminal_reset{ };
 inline std::ostream& operator<<(std::ostream& os, terminal_reset&& b){ return os<<"\033[0m"; }
+}
+
+#include "data_strcut_cint.h"
+namespace util{
+void cluster_comp(cluster& v);
 }
 #endif

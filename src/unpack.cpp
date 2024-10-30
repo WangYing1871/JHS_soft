@@ -174,9 +174,11 @@ bool waveform_by_entry::parse1(char*& iter, char* const& end){
     std::set<uint8_t> tail_fecs;
     for (auto x : iter->second.tails) tail_fecs.insert(get_fec_id(x));
     if (
-        iter->second.heads.size()==m_fec_count
-        && iter->second.tails.size()==m_fec_count
-        && head_fecs==tail_fecs){
+        //iter->second.heads.size()==m_fec_count
+        //&& iter->second.tails.size()==m_fec_count
+        //&& head_fecs==tail_fecs
+        iter->second.heads.size()==iter->second.tails.size()
+        ){
       store(iter->second);
       evt_get ++;
     }
