@@ -1,0 +1,12 @@
+build
+.*.csv
+.*.root
+.*.txt
+config
+JHS
+.*.C
+.*.pdf
+backup
+calc
+main
+.*.pcm
