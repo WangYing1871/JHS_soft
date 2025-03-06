@@ -1,0 +1,7 @@
+build
+.*.csv
+.*.root
+.*.txt
+config
+main
+.*.pcm

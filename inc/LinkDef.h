@@ -1,0 +1,11 @@
+#ifdef __CINT__
+#pragma link off all globals;
+#pragma link off all classes;
+#pragma link off all functions;
+
+#pragma link C++ class entry_new+;
+#pragma link C++ class cluster+;
+#pragma link C++ class entry_tm+;
+#pragma link C++ class entry_strip+;
+
+#endif
