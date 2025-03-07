@@ -18,6 +18,7 @@
 #include <type_traits>
 #include <cassert>
 #include <random>
+#include <functional>
 #include <optional>
 #include <set>
 #include <iomanip>
@@ -60,14 +61,11 @@ weight_least_squart_line_fit(
       std::make_pair(coeff(0),coeff(1))
       );
 }
-  
-
 }
 static std::default_random_engine s_reng;
 constexpr static const float s_r2a = 45./std::atan(1);
-constexpr static const float s_strips_width = 0.60;
-//constexpr static const float s_dfift_velocity = 8.94/1000.;
-constexpr static const float s_dfift_velocity = 8.0/1000.;
+constexpr static const float s_strips_width = 0.65;
+constexpr static const float s_dfift_velocity = 8.94/1000.;
  
 namespace service{
 struct point_t{
@@ -150,6 +148,9 @@ std::ostream& display_entry(size_t evt_id,
 
 }
 namespace user{
+inline double get_x(double x0, double y0, double x1, double y1, double z){
+  if ((y0-z)*(y1-z)>0) return std::nan("");
+  return x0+(x1-x0)*(z-y0)/(y1-y0); }
 
 template <class _tp, class _up>
 std::pair<double,double> fit_pol1(
@@ -198,7 +199,7 @@ std::size_t get_arrive_time(entry_strip const* ptr){
   return std::round(8.33*ptr->time_stamp)+(ptr->peak_position-624)*25;
 }
 double get_peak(entry_strip const* ptr){
-  if (!ptr) return 0.;
+  if (!ptr) return -1.;
   //std::cout
   //  <<" "<<ptr->p0
   //  <<" "<<ptr->p1
@@ -208,6 +209,28 @@ double get_peak(entry_strip const* ptr){
   return ptr->p0+ptr->p1*(27.*std::exp(-3.)); }
 
 
+double get_arrive_time(entry_strip const& hit, double rate=0.2){
+  if (hit.is_fit==0) return -1.;
+  float ret=0.;
+  double p[4] = {hit.p0,hit.p1,hit.p2,hit.p3};
+  auto const& fit_fun = [](double* x, double* p)->double{
+    double buf = (x[0]-p[2])/p[3];
+    return x[0]<p[2] ? p[0] : p[0]+p[1]*std::pow(buf,3)*std::exp(-buf); };
+  TF1 f_wave("f_wave",fit_fun,p[2],p[2]+3*p[3],4);
+  f_wave.SetParameters(p);
+  //std::cout<<p[0]<<" "<<p[1]<<" "<<p[2]<<" "<<p[3]<<std::endl;
+  double index=0.;
+  double step = 0.01;
+  double zpos = rate*27.*std::exp(-3.)*p[1]+p[0];
+  double xpos;
+  for (index=p[2]; index<=p[2]+3.*p[3]; index+=step){
+    double y0 = f_wave.operator()(index);
+    double y1 = f_wave.operator()(index+step);
+    if ((y0-zpos)*(y1-zpos)<=0){ xpos = get_x(index,y0,index+step,y1,zpos); break;} }
+  if (index==p[2]+3) {return -1; }
+  return hit.time_stamp*8.33+(xpos-624.)*25.;
+
+}
 std::size_t get_arrive_time(double p0, double p1, double p2, double p3
     ,std::size_t start_ts){
   auto max_position = 3*p2+p3;
@@ -238,15 +261,14 @@ void get_kx_ky(std::vector<entry_strip> const& hits
   cdn_y = std::nan("");
   pxs.clear();
   pys.clear();
-  std::size_t zero_tm = get_arrive_time(&hits.at(0));
+  std::size_t zero_tm = hits[0].relative_arraive_time;
   std::map<std::uint16_t,std::size_t> xz;
   std::map<std::uint16_t,std::size_t> yz;
   for (auto&& x : hits){
     if (x.p0==0) continue;
     auto arv_tm = get_arrive_time(&x);
-    if (arv_tm<zero_tm) zero_tm=arv_tm;
-    if (x.dim_id==0) xz.emplace(x.channel_id,get_arrive_time(&x));
-    else if (x.dim_id==1) yz.emplace(x.channel_id,get_arrive_time(&x));
+    if (x.dim_id==0) xz.emplace(x.channel_id,x.relative_arraive_time);
+    else if (x.dim_id==1) yz.emplace(x.channel_id,x.relative_arraive_time);
   }
   for (auto&& [x,y] : xz) y-=zero_tm;
   for (auto&& [x,y] : yz) y-=zero_tm;
@@ -320,46 +342,32 @@ struct detector_hits_t{
   std::uint64_t m_event_id=0;
   double m_edep = 0.;
   double m_edep_fit = 0.;
-  std::map<uint16_t,std::pair<uint64_t,double>> m_strip_x;
-  std::map<uint16_t,std::pair<uint64_t,double>> m_strip_y;
+  std::map<uint16_t,std::pair<double,double>> m_strip_x;
+  std::map<uint16_t,std::pair<double,double>> m_strip_y;
   detector_hits_t() = default;
   ~detector_hits_t() noexcept = default;
-  detector_hits_t(std::uint64_t evt_id, detector_entry_t const& raw):m_event_id(evt_id){
+  void set_hits(std::uint64_t evt_id, detector_entry_t const& raw){
+    m_event_id = evt_id;
     if (raw.size()<2) return;
-    std::uint64_t zero_tm = get_arrive_time(&raw.at(0));
-    //info_out(zero_tm);
+    auto iter_zero = std::find_if(std::begin(raw),std::end(raw),
+        [this](auto a){return std::invoke(m_filter,a);});
+    double zero_tm = iter_zero->relative_arraive_time;
     for (auto&& x : raw){
-      if (x.p0<=550 && x.p3>30) continue;
-      auto arv_tm = get_arrive_time(&x);
-      //if (arv_tm<zero_tm) { zero_tm=arv_tm;}
+      if (!std::invoke(m_filter,x)) continue;
+      double arv_tm = x.relative_arraive_time;
       auto pk = x.peak-x.mean;
-      auto pk1 = get_peak(&x)-x.mean;
-      //info_out(pk);
-      //info_out(pk1);
-      //if (pk1==0) { info_out(m_event_id); exit(0);}
+      auto pk1 = get_peak(&x)-x.p0;
       m_edep += pk;
       m_edep_fit += pk1;
-      //std::cout<<m_event_id<<" "<<pk<<" "<<pk1<<" "<<m_edep<<" "<<m_edep_fit
-      //  <<" "<<x.p0<<" "<<x.p1
-      //  <<" "<<(int)x.dim_id<<" "<<(int)x.channel_id
-      //  <<"\n";
-      if (x.dim_id==0){
-        //std::cout<<0<<" "<<x.channel_id<<" "<<arv_tm<<"\n";
-        m_strip_x.emplace(x.channel_id,std::make_pair(arv_tm,pk));
-      }
-      if (x.dim_id==1){
-       //std::cout<<1<<" "<< x.channel_id<<" "<<arv_tm<<"\n";
-        m_strip_y.emplace(x.channel_id,std::make_pair(arv_tm,pk));
-      }
+      if (x.dim_id==0){ m_strip_x.emplace(x.channel_id,std::make_pair(arv_tm,pk1)); }
+      if (x.dim_id==1){ m_strip_y.emplace(x.channel_id,std::make_pair(arv_tm,pk1)); }
     }
     for(auto&& [x,y] : m_strip_x) y.first-=zero_tm;
     for(auto&& [x,y] : m_strip_y) y.first-=zero_tm;
-
-    //std::cout<<"====>"<<m_edep<<" "<<m_edep_fit<<"\n";
   }
 
   std::optional<std::pair<uint16_t,uint16_t>> hit_position() const{
-    if (m_strip_x.size()<3 || m_strip_y.size()<3) return std::nullopt;
+    if (m_strip_x.size()<2 || m_strip_y.size()<2) return std::nullopt;
     double sum_adc_x=0.;
     for (auto&& [_,y] : m_strip_x) sum_adc_x += y.second;
     double sum_adc_y=0.;
@@ -374,17 +382,6 @@ struct detector_hits_t{
         ,std::end(m_strip_y)
         ,[](auto a, auto b) {return a.second.first<b.second.first;}
         );
-
-    //for (auto&& [x,y] : m_strip_x){
-    //  std::cout<<x<<" "<<y.first<<" "<<y.second<<std::endl;
-    //}
-    //info_out("");
-    //for (auto&& [x,y] : m_strip_y){
-    //  std::cout<<x<<" "<<y.first<<" "<<y.second<<std::endl;
-    //}
-    //info_out("");
-
-    //std::cout<<iter_max_dft_x->first<<" "<<iter_max_dft_y->first<<std::endl;
     return std::make_optional(
         std::make_pair(iter_max_dft_x->first,iter_max_dft_y->first)
         );
@@ -392,17 +389,18 @@ struct detector_hits_t{
 
   void draw_xz_yz(TPad* padx, TPad* pady){
     std::stringstream sstr(""); sstr<<"Event_"<<m_event_id<<"_XZ";
-    auto* his_xz = new TH2F(sstr.str().c_str(),sstr.str().c_str(),320,0,320*0.65,250,0,25);
+    auto* his_xz = new TH2F(sstr.str().c_str(),sstr.str().c_str()
+        ,320,0,320,250,0,25);
     his_xz->SetDirectory(nullptr);
     sstr = std::stringstream(""); sstr<<"Event_"<<m_event_id<<"_YZ";
-    auto* his_yz = new TH2F(sstr.str().c_str(),sstr.str().c_str(),320,0,320*0.65,250,0,25);
+    auto* his_yz = new TH2F(sstr.str().c_str(),sstr.str().c_str()
+        ,320,0,320,250,0,25);
     his_yz->SetDirectory(nullptr);
     for (auto&& [x,y] : m_strip_x){
-      //std::cout<<x*0.65<<" "<<y.first*8.94<<" "<<y.second<<std::endl;
-      his_xz->Fill(x*0.65,y.first*s_dfift_velocity,y.second);
+      his_xz->Fill(x,y.first*s_dfift_velocity,y.second);
     }
     for (auto&& [x,y] : m_strip_y){
-      his_yz->Fill(x*0.65,y.first*s_dfift_velocity,y.second);
+      his_yz->Fill(x,y.first*s_dfift_velocity,y.second);
     }
     if (padx){
       padx->cd(); his_xz->Draw("COLZ");
@@ -416,9 +414,9 @@ struct detector_hits_t{
     std::vector<float> data_x;
     std::vector<float> data_y;
     double ex = 0.; for (auto&& [_,x] : m_strip_x) ex += x.second;
-    for (auto&& [x,y] : m_strip_x){
+    for (auto&&[x,y] : m_strip_x){
       if (y.second/ex>thr){
-        data_x.emplace_back(x*0.65);
+        data_x.emplace_back(x*s_strips_width);
         data_y.emplace_back(y.first*s_dfift_velocity);
       }
     }
@@ -454,7 +452,7 @@ struct detector_hits_t{
     double ey = 0.; for (auto&& [_,x] : m_strip_y) ey += x.second;
     for (auto&& [x,y] : m_strip_x){
       if (y.second/ey>thr){
-        data_x.emplace_back(x*0.65);
+        data_x.emplace_back(x*s_strips_width);
         data_y.emplace_back(y.first*s_dfift_velocity);
       }
     }
@@ -532,7 +530,7 @@ struct detector_hits_t{
   void add_points(
       TH1F* hisx = nullptr
       ,TH1F* hisy = nullptr){
-    float thr = 0.01;
+    float thr = 0.02;
     auto const& sample = [](std::size_t number
         ,std::size_t from, std::size_t to){
       std::set<std::size_t> cna;
@@ -540,17 +538,22 @@ struct detector_hits_t{
       while(cna.size()!=number) cna.insert(di(s_reng));
       return cna; };
     if (hisx){
-      float ex = 0.; for (auto&& [_,x] : m_strip_x) ex += x.second;
+      if (m_strip_x.size()<8) return;
+      float ex = 0.; for (auto&&[_,x] : m_strip_x) ex += x.second;
+      std::map<uint16_t,std::pair<double,double>> x_strips;
+      for(auto iter = std::next(std::begin(m_strip_x),2);
+          iter != std::prev(std::end(m_strip_x),2); ++iter)
+        x_strips.emplace(*iter);
+
       std::vector<float> data_x;
       std::vector<float> data_y;
       std::vector<float> weights;
-
       std::vector<float> sp_data_x;
       std::vector<float> sp_data_y;
-      auto sample_idx = sample(2,0,m_strip_x.size()-1);
+      auto sample_idx = sample(2,0,x_strips.size()-1);
       std::size_t index=0;
-      for (int i=0; i<m_strip_x.size(); ++i){
-        auto iter = std::next(std::begin(m_strip_x),i);
+      for (int i=0; i<x_strips.size(); ++i){
+        auto iter = std::next(std::begin(x_strips),i);
         if (sample_idx.find(i) != sample_idx.end()
             && iter->second.second/ex>=thr
             ){
@@ -589,16 +592,21 @@ struct detector_hits_t{
     }
 
     if (hisy){
+      if (m_strip_y.size()<8) return;
       float ey = 0.; for (auto&& [_,x] : m_strip_y) ey += x.second;
+      std::map<uint16_t,std::pair<double,double>> y_strips;
+      for(auto iter = std::next(std::begin(m_strip_y),2);
+          iter != std::prev(std::end(m_strip_y),2); ++iter)
+        y_strips.emplace(*iter);
       std::vector<float> data_x;
       std::vector<float> data_y;
       std::vector<float> weights;
       std::vector<float> sp_data_x;
       std::vector<float> sp_data_y;
-      auto sample_idx = sample(2,0,m_strip_y.size()-1);
+      auto sample_idx = sample(2,0,y_strips.size()-1);
       std::size_t index=0;
-      for (int i=0; i<m_strip_y.size(); ++i){
-        auto iter = std::next(std::begin(m_strip_y),i);
+      for (int i=0; i<y_strips.size(); ++i){
+        auto iter = std::next(std::begin(y_strips),i);
         if (sample_idx.find(i) != sample_idx.end()
             && iter->second.second/ey>=thr
             ){
@@ -637,6 +645,10 @@ struct detector_hits_t{
       }
     }
   }
+
+  typedef std::function<bool(entry_strip const&)> filter_t;
+  filter_t m_filter;
+  void set_filter(filter_t&& f){ m_filter = f;}
     
 };
 
@@ -678,6 +690,7 @@ int main(int argc, char* argv[]){
 
     .register_element<TH2I>("HitMap_L0",320,0,320,320,0,320)
     .register_element<TH1F>("Spectrum_L0_Center",2000,0,40000)
+    .register_element<TH1F>("Spectrum_L0_Center_fit",2000,0,40000)
     .register_element<TH1F>("Spectrum_L0_Side",2000,0,40000)
     .register_element<TH1F>("Spectrum_L0_Total",2000,0,40000)
 
@@ -695,13 +708,22 @@ int main(int argc, char* argv[]){
     .register_element<TH1F>("residual_L0_XZ_60_62",200,-5,5)
 
     .register_element<TH1F>("residual_L0_YZ_15_17",200,-5,5)
+    .register_element<TH1F>("residual_L0_YZ_18_20",200,-5,5)
     .register_element<TH1F>("residual_L0_YZ_20_22",200,-5,5)
+    .register_element<TH1F>("residual_L0_YZ_22_24",200,-5,5)
+    .register_element<TH1F>("residual_L0_YZ_24_26",200,-5,5)
     .register_element<TH1F>("residual_L0_YZ_26_28",200,-5,5)
+    .register_element<TH1F>("residual_L0_YZ_28_30",200,-5,5)
     .register_element<TH1F>("residual_L0_YZ_30_32",200,-5,5)
+    .register_element<TH1F>("residual_L0_YZ_32_34",200,-5,5)
+    .register_element<TH1F>("residual_L0_YZ_34_36",200,-5,5)
+    .register_element<TH1F>("residual_L0_YZ_36_38",200,-5,5)
+    .register_element<TH1F>("residual_L0_YZ_38_40",200,-5,5)
     .register_element<TH1F>("residual_L0_YZ_40_42",200,-5,5)
     .register_element<TH1F>("residual_L0_YZ_50_52",200,-5,5)
     .register_element<TH1F>("residual_L0_YZ_60_62",200,-5,5)
     ;
+
 
   std::vector<entry_strip> hits_vec;
   auto const& fill_hits = [&](){
@@ -721,25 +743,27 @@ int main(int argc, char* argv[]){
   fout->cd();
 
   // temporary
-  entries = entries>100 ? 10000 : entries;
+  //entries = entries>100 ? 10 : entries;
 
+  auto const& hit_filter = [](entry_strip const& hit)->bool{
+    if (hit.is_fit==0) return false;
+    if (hit.p0<=550 || hit.p0>750) return false;
+    if (hit.p2<315. || hit.p2>=455.) return false;
+    if (hit.p3>30) return false;
+    return true; };
   for (decltype(entries) i=0; i<entries; ++i){
+    if (i%10000==0) std::cout<<"progress: "<<i<<"/"<<entries<<std::endl;
     arr->Clear();
     tree->GetEntry(i);
     int hits = arr->GetEntriesFast();
-    //info_out(hits);
-    if (hits<5 || hits>100) continue;
+    if (hits<10 || hits>100) continue;
     fill_hits();
-
-    //service::display_entry(i,hits_vec);
-    
-
-
-    user::detector_hits_t entry(i,hits_vec);
+    user::detector_hits_t entry{};
+    entry.set_filter(hit_filter);
+    entry.set_hits(i,hits_vec);
     auto hit_pos = entry.hit_position();
     if (hit_pos){
       uint16_t posx = hit_pos->first;
-      //info_out(posx);
       uint16_t posy = hit_pos->second;
       (*t_object_factory.get<TH2I>("HitMap_L0"))->Fill(posx,posy);
       (*t_object_factory.get<TH1F>("Spectrum_L0_Total"))->Fill(entry.m_edep);
@@ -748,94 +772,86 @@ int main(int argc, char* argv[]){
       }
       if (posx>130 && posx<180 && posy>140 && posy<195){
         (*t_object_factory.get<TH1F>("Spectrum_L0_Center"))->Fill(entry.m_edep);
-        if (track_count_center<10 && i>4200){
-          std::stringstream sstr(""); sstr<<"Canvas_"<<i;
-          TCanvas* canvas = new TCanvas(sstr.str().c_str(),sstr.str().c_str(),1500,900);
-          canvas->Divide(2,2);
-          entry.draw_xz_yz( dynamic_cast<TPad*>(canvas->cd(1)) ,dynamic_cast<TPad*>(canvas->cd(2)));
-          track_fl->Add(canvas);
-          track_count_center++; }
+        (*t_object_factory.get<TH1F>("Spectrum_L0_Center_fit"))->Fill(entry.m_edep_fit);
+        //if (track_count_center<200 && i>0){
+        //  std::stringstream sstr(""); sstr<<"Canvas_"<<i;
+        //  TCanvas* canvas = new TCanvas(sstr.str().c_str(),sstr.str().c_str(),1500,900);
+        //  canvas->Divide(2,2);
+        //  entry.draw_xz_yz( dynamic_cast<TPad*>(canvas->cd(1)) ,dynamic_cast<TPad*>(canvas->cd(2)));
+        //  track_fl->Add(canvas);
+        //  track_count_center++; }
         float dzx = entry.get_drift_distance_xz();
         if (dzx>8){
           float axz = entry.get_angle_xz(0.02);
           (*t_object_factory.get<TH1F>("track_L0_kXZ"))->Fill(axz);
 
           if (std::abs(axz)>=15 && std::abs(axz)<17){
-            entry.add_points( *t_object_factory.get<TH1F>("residual_L0_XZ_15_17") ,nullptr);
+            entry.add_points(*t_object_factory.get<TH1F>("residual_L0_XZ_15_17") ,nullptr);
           }
           if (std::abs(axz)>=22 && std::abs(axz)<24){
-            entry.add_points( *t_object_factory.get<TH1F>("residual_L0_XZ_20_22") ,nullptr);
+            entry.add_points(*t_object_factory.get<TH1F>("residual_L0_XZ_20_22") ,nullptr);
           }
 
           if (std::abs(axz)>=26 && std::abs(axz)<28){
+            if (track_count_center<400){
+              std::stringstream sstr(""); sstr<<"Event_"<<i;
+              TCanvas* canvas = new TCanvas(sstr.str().c_str(),sstr.str().c_str(),1500,900);
+              canvas->Divide(2,2);
+              entry.draw_xz_yz( dynamic_cast<TPad*>(canvas->cd(1)) ,dynamic_cast<TPad*>(canvas->cd(2)));
+              track_fl->Add(canvas);
+              track_count_center++; }
+
             entry.add_points( *t_object_factory.get<TH1F>("residual_L0_XZ_26_28") ,nullptr);
           }
-          
           if (std::abs(axz)>=32 && std::abs(axz)<34){
-            entry.add_points(
-                *t_object_factory.get<TH1F>("residual_L0_XZ_30_32")
-                ,nullptr
-                );
+            entry.add_points( *t_object_factory.get<TH1F>("residual_L0_XZ_30_32") ,nullptr);
           }
-
           if (std::abs(axz)>=42 && std::abs(axz)<44){
-            entry.add_points(
-                *t_object_factory.get<TH1F>("residual_L0_XZ_40_42")
-                ,nullptr
-                );
+            entry.add_points( *t_object_factory.get<TH1F>("residual_L0_XZ_40_42") ,nullptr);
           }
           if (std::abs(axz)>=52 && std::abs(axz)<54){
-            entry.add_points(
-                *t_object_factory.get<TH1F>("residual_L0_XZ_50_52")
-                ,nullptr
-                );
+            entry.add_points( *t_object_factory.get<TH1F>("residual_L0_XZ_50_52") ,nullptr);
           }
           if (std::abs(axz)>=62 && std::abs(axz)<64){
-            entry.add_points(
-                *t_object_factory.get<TH1F>("residual_L0_XZ_60_62")
-                ,nullptr
-                );
+            entry.add_points( *t_object_factory.get<TH1F>("residual_L0_XZ_60_62") ,nullptr);
           }
         }
         float dzy = entry.get_drift_distance_yz();
-        if (dzy>8.){
-          float ayz = entry.get_angle_yz(0.02);
+        if (dzy>6.){
+          float ayz = entry.get_angle_yz(0.03);
           (*t_object_factory.get<TH1F>("track_L0_kYZ"))->Fill(ayz);
           if (std::abs(ayz)>=15 && std::abs(ayz)<17){
-            entry.add_points( *t_object_factory.get<TH1F>("residual_L0_YZ_15_17") ,nullptr);
+            entry.add_points(nullptr,*t_object_factory.get<TH1F>("residual_L0_YZ_15_17"));
           }
-          if (std::abs(ayz)>=26 && std::abs(ayz)<28){
-            entry.add_points( *t_object_factory.get<TH1F>("residual_L0_YZ_26_28") ,nullptr);
+          if (std::abs(ayz)>=18 && std::abs(ayz)<20){
+            entry.add_points( nullptr ,*t_object_factory.get<TH1F>("residual_L0_YZ_18_20"));
           }
           if (std::abs(ayz)>=20 && std::abs(ayz)<22){
-            entry.add_points(
-                nullptr
-                ,*t_object_factory.get<TH1F>("residual_L0_YZ_20_22")
-                );
+            entry.add_points( nullptr ,*t_object_factory.get<TH1F>("residual_L0_YZ_20_22"));
+          }
+          if (std::abs(ayz)>=22 && std::abs(ayz)<24){
+            entry.add_points( nullptr ,*t_object_factory.get<TH1F>("residual_L0_YZ_22_24"));
+          }
+          if (std::abs(ayz)>=24 && std::abs(ayz)<26){
+            entry.add_points( nullptr ,*t_object_factory.get<TH1F>("residual_L0_YZ_24_26"));
+          }
+          if (std::abs(ayz)>=26 && std::abs(ayz)<28){
+            entry.add_points( nullptr ,*t_object_factory.get<TH1F>("residual_L0_YZ_26_28"));
+          }
+          if (std::abs(ayz)>=28 && std::abs(ayz)<30){
+            entry.add_points( nullptr ,*t_object_factory.get<TH1F>("residual_L0_YZ_28_30"));
           }
           if (std::abs(ayz)>=30 && std::abs(ayz)<32){
-            entry.add_points(
-                nullptr
-                ,*t_object_factory.get<TH1F>("residual_L0_YZ_30_32")
-                );
+            entry.add_points( nullptr ,*t_object_factory.get<TH1F>("residual_L0_YZ_30_32"));
           }
           if (std::abs(ayz)>=40 && std::abs(ayz)<42){
-            entry.add_points(
-                nullptr
-                ,*t_object_factory.get<TH1F>("residual_L0_YZ_40_42")
-                );
+            entry.add_points( nullptr ,*t_object_factory.get<TH1F>("residual_L0_YZ_40_42"));
           }
           if (std::abs(ayz)>=50 && std::abs(ayz)<52){
-            entry.add_points(
-                nullptr
-                ,*t_object_factory.get<TH1F>("residual_L0_YZ_50_52")
-                );
+            entry.add_points( nullptr ,*t_object_factory.get<TH1F>("residual_L0_YZ_50_52"));
           }
           if (std::abs(ayz)>=60 && std::abs(ayz)<62){
-            entry.add_points(
-                nullptr
-                ,*t_object_factory.get<TH1F>("residual_L0_YZ_60_62")
-                );
+            entry.add_points( nullptr ,*t_object_factory.get<TH1F>("residual_L0_YZ_60_62"));
           }
         } 
       }

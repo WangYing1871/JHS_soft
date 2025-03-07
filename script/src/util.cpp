@@ -73,7 +73,7 @@ det_id_t id_trans::tran(fec_id_t const& v) const{
 #include "TFile.h"
 #include "TF1.h"
 namespace util{
-double get_x(double x0, double y0, double x1, double y1, double z){
+inline double get_x(double x0, double y0, double x1, double y1, double z){
   if ((y0-z)*(y1-z)>0) return std::nan("");
   return x0+(x1-x0)*(z-y0)/(y1-y0); }
 

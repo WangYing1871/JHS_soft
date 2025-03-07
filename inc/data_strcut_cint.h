@@ -53,6 +53,8 @@ struct entry_strip : public TObject{
   uint16_t peak_position;
   std::uint8_t is_fit=0;
   double fit_cdn = -1.;
+  double relative_arraive_time=0.;
+
 
 
   entry_strip()=default;

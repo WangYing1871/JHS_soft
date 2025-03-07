@@ -49,7 +49,7 @@ namespace constant{
 constexpr static const std::size_t s_det_strips_x = 320;
 constexpr static const std::size_t s_det_strips_y = 320;
 constexpr static const std::size_t s_max_hit_strips = 200;
-constexpr static const std::size_t s_min_hit_strips = 3;
+constexpr static const std::size_t s_min_hit_strips = 2;
 }
 
 static std::default_random_engine s_reng;
@@ -449,7 +449,7 @@ int main(int argc, char* argv[]){
   //slider.set_label("fit wave");
   //auto __attribute__((unused)) ft0 = std::async(&ui::Xslider::start,std::ref(slider));
 
-  //entries = entries>100 ? 1000 : entries;
+  //entries = entries>100 ? 100 : entries;
 
   for (int j=0; j<std::ceil(entries/buf_distance); ++j){
     int e_start = j*buf_distance;
@@ -462,7 +462,6 @@ int main(int argc, char* argv[]){
       std::map<int,uint64_t> ts_map;
       for (std::size_t index=0; auto&& x : data->fec_ids)
         ts_map[x] = data->time_stamps[index++];
-      info_out("................");
       for (std::size_t index=0; auto&& x : data->global_ids){
         auto const& adcs = data->adcs[index++];
         int fec_id = x>>8;
@@ -481,16 +480,14 @@ int main(int argc, char* argv[]){
           max_id.time_stamp = ts;
           util::make_t_grpah(grp_buf,std::begin(adcs),std::end(adcs));
           auto fit_result = util::fit_wave(grp_buf,fit_para,at_rate,at_buf);
-          std::cout<<j*buf_distance+i<<" "<<fec_id<<" "<<channel_id
-            <<";"<<fit_para[0]
-            <<";"<<fit_para[1]
-            <<";"<<fit_para[2]
-            <<";"<<fit_para[3]
-            <<" "<<at_buf
-            <<std::endl;
+          //Std::cout<<j*buf_distance+i<<" "<<fec_id<<" "<<channel_id
+          //  <<";"<<fit_para[0]
+          //  <<";"<<fit_para[1]
+          //  <<";"<<fit_para[2]
+          //  <<";"<<fit_para[3]
+          //  <<" "<<at_buf
+          //  <<std::endl;
           delete grp_buf;
-          //grp_buf->Write();
-          //double arrive_time = 0;
           double arrive_time = std::round(ts*8.33)+(at_buf-624.)*25.;
           std::copy(fit_para,fit_para+4,max_id.fit_parameter);
           max_id.is_fit = fit_result.first;
@@ -522,7 +519,6 @@ int main(int argc, char* argv[]){
           && std::distance(iter_prev,iter_next)>=constant::s_min_hit_strips
           && std::distance(iter_prev,iter_next)<=constant::s_max_hit_strips
           ){
-        //info_out(std::distance(iter_prev,iter_next));
         int hit_count=0;
         for (auto iter_tmp = iter_prev; iter_tmp!=iter_next; ++iter_tmp){
           if (iter_tmp->second.is_valid){
@@ -538,13 +534,19 @@ int main(int argc, char* argv[]){
             data_strip.p1 = iter_tmp->second.fit_parameter[1];
             data_strip.p2 = iter_tmp->second.fit_parameter[2];
             data_strip.p3 = iter_tmp->second.fit_parameter[3];
-            data_strip.time_stamp = iter_tmp->second.time_stamp;
             data_strip.raw_evt_id = iter_tmp->second.evt_id;
             data_strip.peak = iter_tmp->second.max;
             data_strip.peak_position = iter_tmp->second.max_postion;
             data_strip.mean = ms.first;
             data_strip.sigma = ms.second;
-            //data_strip.is_fit = iter_tmp-
+            data_strip.is_fit = iter_tmp->second.is_fit ? 1 : 0;
+            data_strip.fit_cdn = iter_tmp->second.fit_cdn;
+            data_strip.relative_arraive_time = iter_tmp->first-iter_prev->first;
+
+            //std::cout<<iter_tmp->first-iter_prev->first
+            //  <<" "<<(int)data_strip.dim_id
+            //  <<" "<<data_strip.channel_id
+            //  <<"\n";
 
             //std::cout
             //  <<data_strip.p0<<" "
