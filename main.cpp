@@ -4,6 +4,7 @@
 //^-^ File: temp1.cpp
 //--------------------------------------------------------------------
 #define info_out(X) std::cout<<"==> "<<__LINE__<<" "<<#X<<" |"<<(X)<<"|\n"
+#include <atomic>
 #include <algorithm>
 #include <numeric>
 #include <iostream>
@@ -14,6 +15,29 @@
 #include <sstream>
 #include <set>
 #include <filesystem>
+#include <future>
+#include <bitset>
+#include <mutex>
+#include <thread>
+
+#include <boost/timer/timer.hpp>
+#include "readerwriterqueue/readerwritercircularbuffer.h"
+
+static std::atomic<bool> stop_flag(false);
+#ifdef __linux__
+#include <signal.h>
+typedef void(*signal_handle_ptr_t)(int);
+void signal_handler(int signo){
+  if (signo==SIGINT){
+    stop_flag.store(true);
+  }
+  if (signo==SIGQUIT){
+    info_out("SIGQUIT CATCHED");
+    stop_flag.store(true);
+    exit(0);
+  }
+}
+#endif
 
 #include "TFolder.h"
 #include "TFile.h"
@@ -62,6 +86,7 @@ int main(int argc, char* argv[]){
     mainwindow window;
     window.show();
     return app.exec();
+    //return 0;
   }
 
   if (opt_parser.vm.count("config")){
@@ -105,30 +130,143 @@ step0:
     std::string entry_out_file = dat_name.substr(
         0,dat_name.find_last_of("."))+"_entry.root";
     TFile* fout = new TFile(entry_out_file.c_str(),"recreate");
-    
-    //TODO !!! read-write-queue needed! //FIXME
-    std::ifstream fin(dat_name.c_str(),std::ios::binary);
-    fin.seekg(0,std::ios_base::end);
-    size_t fsz = fin.tellg();
-    std::size_t oneG = (std::size_t)1000*1024*1024;
-    fsz = fsz>oneG? oneG : fsz;
-    info_out(fsz);
-    fin.seekg(0,std::ios_base::beg);
-    char* data = new char[fsz];
-    fin.read(data,fsz);
-    char* iter_beg = data;
-    fin.close();
-
-
     waveform_by_entry wf;
     wf.fec_count(fec_count);
     wf.set_store(entry_buffer);
     wf.set_tree(data_tree);
-    wf.do_parse(iter_beg,iter_beg+fsz);
+    
+    //TODO !!! read-write-queue needed!
+    //[R TODO] 2024-11-21 11:54:58: 
+    //template <class _tp, >
+    //struct read_write_queue{
+
+
+
+
+    //};
+    {
+#ifdef __linux__
+      signal(SIGINT,signal_handler);
+      signal(SIGQUIT,signal_handler);
+#endif
+      std::mutex g_mutex;
+      constexpr static std::size_t const c_block_size = 10*1024*1024; //10*MB
+      typedef std::array<char,c_block_size> block_t;
+      moodycamel::BlockingReaderWriterCircularBuffer<block_t> mpool(63);
+    auto const& m_enque = [&](std::string const& fname,uint32_t bs)->void{
+      std::ifstream fin(fname.c_str(),std::ios::binary);
+      fin.seekg(0,std::ios::beg);
+      info_out(fname);
+      
+      char data[100];
+      fin.read(data,100);
+      info_out(std::filesystem::file_size(fname));
+      info_out(bs);
+
+      //std::array<char,c_block_size> buffer;
+      //fin.read(buffer.data(),10);
+      
+      while(!fin.eof() && !stop_flag.load()){
+        block_t buf;
+      //  //std::cout<<"BLOCK READ\n";
+      //  fin.read(buf.data(),bs);
+      //  bool ok = mpool.try_enqueue(buf);
+      //  //mpool.wait_enqueue(buf);
+      //  //bool ok = mpool.wait_enqueue_timed(buf,100);
+      //  if (!ok){
+      //    std::lock_guard<std::mutex> lock(g_mutex);
+      //    fin.seekg(-bs,std::ios::cur);
+      //    info_out("WRITE timeout!");
+      //  }else{
+      //    std::lock_guard<std::mutex> lock(g_mutex);
+      //    info_out(fin.tellg());
+      //    //info_out("enqueue");
+      //  }
+
+      }
+      //stop_flag.store(true);
+      fin.close();
+    };
+    std::bitset<16> error_record(0xFF);
+    std::atomic<int> read_count;
+  auto const& m_deque = [&](uint32_t bs)->void{
+    block_t block;
+    //error_record.set(read_count.load()%16,ok);
+    read_count++;
+    while(!stop_flag.load()){
+      //std::this_thread::sleep_for(std::chrono::microseconds(100));
+      bool ok = mpool.try_dequeue(block);
+      //bool ok = mpool.wait_dequeue_timed(block,del);
+      if (ok){
+        char* start = block.data();
+        char* end = start+bs;
+        info_out("do_parse");
+        wf.do_parse(start,end);
+
+
+      }else{
+        std::lock_guard<std::mutex> lock(g_mutex);
+        info_out("empty pool");
+      }
+    }
+
+    //std::bitset<16> bits;
+    //assert(blocks<16);
+    //std::vector<block_t>(blocks);
+    //for (int i=0; i<blocks; ++i){
+    //  bits.set(i,mpool.try_dequeue)
+
+    //}
+
+  };
+  {
+    boost::timer::auto_cpu_timer progress;
+    info_out(dat_name);
+
+    //std::ifstream fin(dat_name,std::ios::binary);
+    //fin.seekg(0,std::ios::beg);
+    //std::array<char,1000> datas;
+    //fin.read(datas.data(),1000);
+    //fin.close();
+
+    std::future<void> file_reader(std::async(m_enque,std::cref(dat_name),c_block_size));
+
+    //std::future<void> file_write(std::async(m_deque,c_block_size));
+    
+  }
+
+
+
+
+
+
+
+
+
+
+
+
+
+    }
+
+    
+
+    //std::ifstream fin(dat_name.c_str(),std::ios::binary);
+    //fin.seekg(0,std::ios_base::end);
+    //size_t fsz = fin.tellg();
+    //std::size_t oneG = (std::size_t)2000*1024*1024;
+    //fsz = fsz>oneG? oneG : fsz;
+    //info_out(fsz);
+    //fin.seekg(0,std::ios_base::beg);
+    //char* data = new char[fsz];
+    //fin.read(data,fsz);
+    //char* iter_beg = data;
+    //fin.close();
+    //wf.do_parse(iter_beg,iter_beg+fsz);
+    //delete[] data;
     fout->cd();
     data_tree->Write(); 
     fout->Write(); fout->Close(); 
-    delete[] data;
     std::cout<<"Raw Root Store: "<<entry_out_file<<"\n";
     typedef typename util::terminal_color tc;
     using namespace util;
@@ -137,6 +275,7 @@ step0:
         ,tc::f_color::k_white
         ,tc::b_color::k_blue)
       <<"---->UNPACK DONE<----" <<util::terminal_reset() <<std::endl;
+    return 0;
   }
 
 step1:

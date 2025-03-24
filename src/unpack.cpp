@@ -38,10 +38,13 @@ bool waveform_by_entry::valid(tail_t const& tail){
 void waveform_by_entry::store(unit_t const& unit){
   if (!m_store_ref || !m_tree_ref) return;
   m_store_ref->event_id = get_event_id(unit.heads[0]);
-  uint64_t ts = get_timestamp(unit.heads[0]);
-  ts &= 0xFFFFFFFFFFFF;
-  m_store_ref->time_stamp = ts*s_ts_unit/1.e+6; /* unit: ms */
   m_store_ref->fec_ids.resize(unit.heads.size());
+  m_store_ref->time_stamps.resize(unit.heads.size());
+  for (int i=0; i<unit.heads.size(); ++i){
+    uint64_t ts = get_timestamp(unit.heads[i]);
+    ts &= 0xFFFFFFFFFFFF;
+    m_store_ref->time_stamps[i] = ts;
+  }
   std::transform(std::begin(unit.heads),std::end(unit.heads),std::begin(m_store_ref->fec_ids)
       ,[&](head_t const& v){return this->get_fec_id(v);});
   m_store_ref->global_ids.resize(unit.bodys.size());
@@ -78,7 +81,6 @@ void waveform_by_entry::store(){
 
 
 bool waveform_by_entry::parse1(char*& iter, char* const& end){
-  std::map<uint32_t,unit_t> in_memory;
   using namespace util;
   auto const& parse_head = [&](head_t& head)->bool{
     read_int(head.start_tag,iter);
@@ -174,6 +176,12 @@ bool waveform_by_entry::parse1(char*& iter, char* const& end){
   }
   slider.stop();
 
+  dump();
+  return true;
+}
+void waveform_by_entry::dump(){
+  if (in_memory.size()<5000 && m_mode==1 && m_first_invoke==true) return;
+  m_first_invoke = true;
   size_t evt_get = 0;
   for (auto iter = in_memory.begin(); iter != in_memory.end(); ++iter){
     std::set<uint8_t> head_fecs;
@@ -187,11 +195,12 @@ bool waveform_by_entry::parse1(char*& iter, char* const& end){
         iter->second.heads.size()==iter->second.tails.size()
         ){
       store(iter->second);
-      evt_get ++;
+      evt_get++;
     }
   }
   std::cout<<"event parsed: "<<in_memory.size()<<" event store: "<<evt_get<<std::endl;
-  return true;
+  in_memory.clear();
+
 }
 
 bool waveform_by_entry::parse(char*& iter, char* const& end){

@@ -1,6 +1,6 @@
 // Do NOT change. Changes will be lost next time file is generated
 
-#define R__DICTIONARY_FILENAME dIhomedIwangyingdIdesktopdIab_softdIzhangrydIanalysiscode_version6_2dIJHS_ana_leastdIJHS_anadIsrcdIroot_cint_out
+#define R__DICTIONARY_FILENAME dIhomedIwangyingdIdesktopdIab_softdIzhangrydIanalysiscode_version6_2dIJHS_ana_least_bkdIJHS_anadIsrcdIroot_cint_out
 #define R__NO_DEPRECATION
 
 /*******************************************************************/
@@ -87,7 +87,7 @@ namespace ROOT {
       ::cluster *ptr = nullptr;
       static ::TVirtualIsAProxy* isa_proxy = new ::TInstrumentedIsAProxy< ::cluster >(nullptr);
       static ::ROOT::TGenericClassInfo 
-         instance("cluster", ::cluster::Class_Version(), "data_strcut_cint.h", 20,
+         instance("cluster", ::cluster::Class_Version(), "data_strcut_cint.h", 21,
                   typeid(::cluster), ::ROOT::Internal::DefineBehavior(ptr, ptr),
                   &::cluster::Dictionary, isa_proxy, 4,
                   sizeof(::cluster) );
@@ -373,6 +373,71 @@ namespace ROOT {
 } // end of namespace ROOT for class vector<unsigned short>
 
 namespace ROOT {
+   static TClass *vectorlEunsignedsPlonggR_Dictionary();
+   static void vectorlEunsignedsPlonggR_TClassManip(TClass*);
+   static void *new_vectorlEunsignedsPlonggR(void *p = nullptr);
+   static void *newArray_vectorlEunsignedsPlonggR(Long_t size, void *p);
+   static void delete_vectorlEunsignedsPlonggR(void *p);
+   static void deleteArray_vectorlEunsignedsPlonggR(void *p);
+   static void destruct_vectorlEunsignedsPlonggR(void *p);
+
+   // Function generating the singleton type initializer
+   static TGenericClassInfo *GenerateInitInstanceLocal(const vector<unsigned long>*)
+   {
+      vector<unsigned long> *ptr = nullptr;
+      static ::TVirtualIsAProxy* isa_proxy = new ::TIsAProxy(typeid(vector<unsigned long>));
+      static ::ROOT::TGenericClassInfo 
+         instance("vector<unsigned long>", -2, "vector", 389,
+                  typeid(vector<unsigned long>), ::ROOT::Internal::DefineBehavior(ptr, ptr),
+                  &vectorlEunsignedsPlonggR_Dictionary, isa_proxy, 0,
+                  sizeof(vector<unsigned long>) );
+      instance.SetNew(&new_vectorlEunsignedsPlonggR);
+      instance.SetNewArray(&newArray_vectorlEunsignedsPlonggR);
+      instance.SetDelete(&delete_vectorlEunsignedsPlonggR);
+      instance.SetDeleteArray(&deleteArray_vectorlEunsignedsPlonggR);
+      instance.SetDestructor(&destruct_vectorlEunsignedsPlonggR);
+      instance.AdoptCollectionProxyInfo(TCollectionProxyInfo::Generate(TCollectionProxyInfo::Pushback< vector<unsigned long> >()));
+
+      instance.AdoptAlternate(::ROOT::AddClassAlternate("vector<unsigned long>","std::vector<unsigned long, std::allocator<unsigned long> >"));
+      return &instance;
+   }
+   // Static variable to force the class initialization
+   static ::ROOT::TGenericClassInfo *_R__UNIQUE_DICT_(Init) = GenerateInitInstanceLocal(static_cast<const vector<unsigned long>*>(nullptr)); R__UseDummy(_R__UNIQUE_DICT_(Init));
+
+   // Dictionary for non-ClassDef classes
+   static TClass *vectorlEunsignedsPlonggR_Dictionary() {
+      TClass* theClass =::ROOT::GenerateInitInstanceLocal(static_cast<const vector<unsigned long>*>(nullptr))->GetClass();
+      vectorlEunsignedsPlonggR_TClassManip(theClass);
+   return theClass;
+   }
+
+   static void vectorlEunsignedsPlonggR_TClassManip(TClass* ){
+   }
+
+} // end of namespace ROOT
+
+namespace ROOT {
+   // Wrappers around operator new
+   static void *new_vectorlEunsignedsPlonggR(void *p) {
+      return  p ? ::new(static_cast<::ROOT::Internal::TOperatorNewHelper*>(p)) vector<unsigned long> : new vector<unsigned long>;
+   }
+   static void *newArray_vectorlEunsignedsPlonggR(Long_t nElements, void *p) {
+      return p ? ::new(static_cast<::ROOT::Internal::TOperatorNewHelper*>(p)) vector<unsigned long>[nElements] : new vector<unsigned long>[nElements];
+   }
+   // Wrapper around operator delete
+   static void delete_vectorlEunsignedsPlonggR(void *p) {
+      delete (static_cast<vector<unsigned long>*>(p));
+   }
+   static void deleteArray_vectorlEunsignedsPlonggR(void *p) {
+      delete [] (static_cast<vector<unsigned long>*>(p));
+   }
+   static void destruct_vectorlEunsignedsPlonggR(void *p) {
+      typedef vector<unsigned long> current_t;
+      (static_cast<current_t*>(p))->~current_t();
+   }
+} // end of namespace ROOT for class vector<unsigned long>
+
+namespace ROOT {
    static TClass *vectorlEunsignedsPchargR_Dictionary();
    static void vectorlEunsignedsPchargR_TClassManip(TClass*);
    static void *new_vectorlEunsignedsPchargR(void *p = nullptr);
@@ -509,9 +574,9 @@ namespace {
 nullptr
     };
     static const char* includePaths[] = {
-"/home/wangying/desktop/ab_soft/zhangry/analysiscode_version6_2/JHS_ana_least/JHS_ana/inc",
+"/home/wangying/desktop/ab_soft/zhangry/analysiscode_version6_2/JHS_ana_least_bk/JHS_ana/inc",
 "/home/wangying/software/root-6.30.04-build/include/",
-"/home/wangying/Desktop/ab_soft/zhangry/analysiscode_version6_2/JHS_ana_least/JHS_ana/build/",
+"/home/wangying/Desktop/ab_soft/zhangry/analysiscode_version6_2/JHS_ana_least_bk/JHS_ana/build2/",
 nullptr
     };
     static const char* fwdDeclCode = R"DICTFWDDCLS(

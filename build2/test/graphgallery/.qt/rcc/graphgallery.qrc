@@ -1,0 +1,14 @@
+<RCC>
+  <qresource prefix="/">
+    <file alias="data/raindata.txt">/home/wangying/desktop/ab_soft/zhangry/analysiscode_version6_2/JHS_ana_least_bk/JHS_ana/test/graphgallery/data/raindata.txt</file>
+    <file alias="data/layer_1.png">/home/wangying/desktop/ab_soft/zhangry/analysiscode_version6_2/JHS_ana_least_bk/JHS_ana/test/graphgallery/data/layer_1.png</file>
+    <file alias="data/layer_2.png">/home/wangying/desktop/ab_soft/zhangry/analysiscode_version6_2/JHS_ana_least_bk/JHS_ana/test/graphgallery/data/layer_2.png</file>
+    <file alias="data/layer_3.png">/home/wangying/desktop/ab_soft/zhangry/analysiscode_version6_2/JHS_ana_least_bk/JHS_ana/test/graphgallery/data/layer_3.png</file>
+    <file alias="data/oilrig.obj">/home/wangying/desktop/ab_soft/zhangry/analysiscode_version6_2/JHS_ana_least_bk/JHS_ana/test/graphgallery/data/oilrig.obj</file>
+    <file alias="data/pipe.obj">/home/wangying/desktop/ab_soft/zhangry/analysiscode_version6_2/JHS_ana_least_bk/JHS_ana/test/graphgallery/data/pipe.obj</file>
+    <file alias="data/refinery.obj">/home/wangying/desktop/ab_soft/zhangry/analysiscode_version6_2/JHS_ana_least_bk/JHS_ana/test/graphgallery/data/refinery.obj</file>
+    <file alias="data/maptexture.jpg">/home/wangying/desktop/ab_soft/zhangry/analysiscode_version6_2/JHS_ana_least_bk/JHS_ana/test/graphgallery/data/maptexture.jpg</file>
+    <file alias="data/topography.png">/home/wangying/desktop/ab_soft/zhangry/analysiscode_version6_2/JHS_ana_least_bk/JHS_ana/test/graphgallery/data/topography.png</file>
+  </qresource>
+</RCC>
+

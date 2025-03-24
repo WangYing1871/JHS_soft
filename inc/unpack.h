@@ -88,6 +88,7 @@ private:
     std::vector<tail_t> tails;
   };
   unit_t m_unit;
+  std::map<uint32_t,unit_t> in_memory;
   void store();
   void store(unit_t const&);
   constexpr static uint8_t const cs_start_tag = 0x5a;
@@ -107,6 +108,13 @@ public:
     return parse1(iter,end);
     //return parse(iter,end);
   }
+
+  void dump();
+  int m_mode = 1;
+  bool m_first_invoke = false;
+
+public:
+  void set_mode(int v) {m_mode=v;}
 
 
   struct event_id_recordor{

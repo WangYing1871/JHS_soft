@@ -9,8 +9,26 @@ add_compile_options(-rdynamic -fPIC)
 # CERN-ROOT suggest CXX17
 add_compile_options(-Wno-cpp)
 
-find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets)
+find_package(Qt6 REQUIRED
+    COMPONENTS 
+    Core 
+    Gui 
+    Widgets 
+    DataVisualization 
+    Concurrent
+    )
 qt_standard_project_setup()
+ 
+set(build_type "")
+if(CMAKE_BUILD_TYPE)
+  set(build_type "${CMAKE_BUILD_TYPE}")
+  message(STATUS "Build_type: ${build_type}")
+  if("${build_type}" STREQUAL "Debug")
+      add_definitions(-DDEBUG)
+  endif()
+
+endif()
+
 
 #set_target_properties(menus PROPERTIES
 #    WIN32_EXECUTABLE TRUE
@@ -28,7 +46,8 @@ qt_standard_project_setup()
 #  message(FATAL_ERROR "ncurese library not found.")
 #endif()
 
-find_package(Boost COMPONENTS program_options REQUIRED)
+find_package(Boost COMPONENTS program_options timer REQUIRED)
+find_package(FFTW3 REQUIRED)
 #if (BOOST_FOUND)
 #  message(STATUS "BOOST_FOUND")
 #else()
@@ -39,8 +58,11 @@ find_package(ROOT REQUIRED)
 include_directories(${PROJECT_SOURCE_DIR}/inc
     ${ROOT_INCLUDE_DIRS}
     ${ROOT_INCLUDE_DIR}
+    ${FFTW3_INCLUDE_DIRS}
     ${PROJECT_SOURCE_DIR}/gui/inc
     ${PROJECT_SOURCE_DIR}/gui/3rdparty
+    ${PROJECT_SOURCE_DIR}/gui/3rdparty/dct
+    ${PROJECT_SOURCE_DIR}/3rdparty
     )
 find_program(ROOTCINT rootcint PATH_SUFFIXES bin REQUIRED)
 set(root_cint_out "root_cint_out.cpp")
@@ -50,7 +72,7 @@ execute_process(COMMAND "${ROOTCINT}" -I ${PROJECT_SOURCE_DIR}/inc -f ${root_cin
 
 find_program(UIC uic PATH_SUFFIXES bin REQUIRED)
 
-message(STATUS "uic")
+message(STATUS "uic found")
 file(GLOB ui_file
   ${PROJECT_SOURCE_DIR}/gui/ui/*.ui
   )
@@ -93,9 +115,10 @@ file(GLOB gui
 
 file (GLOB 3rdparty
   ${PROJECT_SOURCE_DIR}/gui/3rdparty/*.cpp
+  ${PROJECT_SOURCE_DIR}/gui/3rdparty/dct/*.cpp
   )
 
-set(exec_name "JSH")
+set(exec_name "JHS")
 #add_executable(${exec_name} main.cpp ${sources} ${headers})
 add_executable(
   ${exec_name} 
@@ -105,14 +128,26 @@ add_executable(
   ${gui}
   ${3rdparty}
 )
+target_link_directories(
+  ${exec_name}
+  PRIVATE
+  ${FFTW3_LIBRARY_DIRS}
+)
 target_link_libraries(
   ${exec_name} 
   ${ROOT_LIBRARIES} 
-  ${Boost_LIBRARIES}
+  ROOT::RooFitCore
+  ROOT::RooFit
+  Boost::timer
+  Boost::program_options
   Qt6::Core
   Qt6::Gui
   Qt6::Widgets
+  Qt6::DataVisualization
+  Qt6::Concurrent
+  ${FFTW3_LIBRARIES}
   )
+
 
 if (NOT EXISTS "calc")
   file(COPY "${PROJECT_SOURCE_DIR}/calc" DESTINATION "./")
@@ -122,4 +157,6 @@ if (NOT EXISTS "argv.ini")
 endif()
 
 add_subdirectory(script)
+add_subdirectory(test)
 #target_link_libraries(${exec_name} ${ROOT_LIBRARIES} Boost::timer)
+message(STATUS "FFTW3_LIBRARIES: ${FFTW3_LIBRARIES}")

@@ -9,7 +9,8 @@ struct entry_new : public TObject{
   uint32_t event_id;
   std::vector<uint8_t> fec_ids;
   std::vector<uint8_t> hit_channel_nos;
-  float time_stamp;
+ // float time_stamp;
+  std::vector<uint64_t> time_stamps;
   std::vector<uint16_t> global_ids;
   std::vector<std::vector<uint16_t>> adcs;
 

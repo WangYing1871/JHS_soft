@@ -1,0 +1,264 @@
+{
+	"BUILD_DIR" : "/home/wangying/desktop/ab_soft/zhangry/analysiscode_version6_2/JHS_ana_least_bk/JHS_ana/build2/test/graphgallery/graphgallery_autogen",
+	"CMAKE_BINARY_DIR" : "/home/wangying/desktop/ab_soft/zhangry/analysiscode_version6_2/JHS_ana_least_bk/JHS_ana/build2",
+	"CMAKE_CURRENT_BINARY_DIR" : "/home/wangying/desktop/ab_soft/zhangry/analysiscode_version6_2/JHS_ana_least_bk/JHS_ana/build2/test/graphgallery",
+	"CMAKE_CURRENT_SOURCE_DIR" : "/home/wangying/desktop/ab_soft/zhangry/analysiscode_version6_2/JHS_ana_least_bk/JHS_ana/test/graphgallery",
+	"CMAKE_EXECUTABLE" : "/home/wangying/software/CMake-build/bin/cmake",
+	"CMAKE_LIST_FILES" : 
+	[
+		"/home/wangying/desktop/ab_soft/zhangry/analysiscode_version6_2/JHS_ana_least_bk/JHS_ana/test/graphgallery/CMakeLists.txt",
+		"/home/wangying/software/qt6-cmake/lib/cmake/Qt6Core/Qt6CoreConfigureFileTemplate.in"
+	],
+	"CMAKE_SOURCE_DIR" : "/home/wangying/desktop/ab_soft/zhangry/analysiscode_version6_2/JHS_ana_least_bk/JHS_ana",
+	"CROSS_CONFIG" : false,
+	"DEP_FILE" : "/home/wangying/desktop/ab_soft/zhangry/analysiscode_version6_2/JHS_ana_least_bk/JHS_ana/build2/test/graphgallery/graphgallery_autogen/deps",
+	"DEP_FILE_RULE_NAME" : "graphgallery_autogen/timestamp",
+	"HEADERS" : 
+	[
+		[
+			"/home/wangying/desktop/ab_soft/zhangry/analysiscode_version6_2/JHS_ana_least_bk/JHS_ana/test/graphgallery/axesinputhandler.h",
+			"MU",
+			"EWIEGA46WW/moc_axesinputhandler.cpp",
+			null
+		],
+		[
+			"/home/wangying/desktop/ab_soft/zhangry/analysiscode_version6_2/JHS_ana_least_bk/JHS_ana/test/graphgallery/bargraph.h",
+			"MU",
+			"EWIEGA46WW/moc_bargraph.cpp",
+			null
+		],
+		[
+			"/home/wangying/desktop/ab_soft/zhangry/analysiscode_version6_2/JHS_ana_least_bk/JHS_ana/test/graphgallery/custominputhandler.h",
+			"MU",
+			"EWIEGA46WW/moc_custominputhandler.cpp",
+			null
+		],
+		[
+			"/home/wangying/desktop/ab_soft/zhangry/analysiscode_version6_2/JHS_ana_least_bk/JHS_ana/test/graphgallery/graphmodifier.h",
+			"MU",
+			"EWIEGA46WW/moc_graphmodifier.cpp",
+			null
+		],
+		[
+			"/home/wangying/desktop/ab_soft/zhangry/analysiscode_version6_2/JHS_ana_least_bk/JHS_ana/test/graphgallery/highlightseries.h",
+			"MU",
+			"EWIEGA46WW/moc_highlightseries.cpp",
+			null
+		],
+		[
+			"/home/wangying/desktop/ab_soft/zhangry/analysiscode_version6_2/JHS_ana_least_bk/JHS_ana/test/graphgallery/rainfalldata.h",
+			"MU",
+			"EWIEGA46WW/moc_rainfalldata.cpp",
+			null
+		],
+		[
+			"/home/wangying/desktop/ab_soft/zhangry/analysiscode_version6_2/JHS_ana_least_bk/JHS_ana/test/graphgallery/scatterdatamodifier.h",
+			"MU",
+			"EWIEGA46WW/moc_scatterdatamodifier.cpp",
+			null
+		],
+		[
+			"/home/wangying/desktop/ab_soft/zhangry/analysiscode_version6_2/JHS_ana_least_bk/JHS_ana/test/graphgallery/scattergraph.h",
+			"MU",
+			"EWIEGA46WW/moc_scattergraph.cpp",
+			null
+		],
+		[
+			"/home/wangying/desktop/ab_soft/zhangry/analysiscode_version6_2/JHS_ana_least_bk/JHS_ana/test/graphgallery/surfacegraph.h",
+			"MU",
+			"EWIEGA46WW/moc_surfacegraph.cpp",
+			null
+		],
+		[
+			"/home/wangying/desktop/ab_soft/zhangry/analysiscode_version6_2/JHS_ana_least_bk/JHS_ana/test/graphgallery/surfacegraphmodifier.h",
+			"MU",
+			"EWIEGA46WW/moc_surfacegraphmodifier.cpp",
+			null
+		],
+		[
+			"/home/wangying/desktop/ab_soft/zhangry/analysiscode_version6_2/JHS_ana_least_bk/JHS_ana/test/graphgallery/topographicseries.h",
+			"MU",
+			"EWIEGA46WW/moc_topographicseries.cpp",
+			null
+		],
+		[
+			"/home/wangying/desktop/ab_soft/zhangry/analysiscode_version6_2/JHS_ana_least_bk/JHS_ana/test/graphgallery/variantbardatamapping.h",
+			"MU",
+			"EWIEGA46WW/moc_variantbardatamapping.cpp",
+			null
+		],
+		[
+			"/home/wangying/desktop/ab_soft/zhangry/analysiscode_version6_2/JHS_ana_least_bk/JHS_ana/test/graphgallery/variantbardataproxy.h",
+			"MU",
+			"EWIEGA46WW/moc_variantbardataproxy.cpp",
+			null
+		],
+		[
+			"/home/wangying/desktop/ab_soft/zhangry/analysiscode_version6_2/JHS_ana_least_bk/JHS_ana/test/graphgallery/variantdataset.h",
+			"MU",
+			"EWIEGA46WW/moc_variantdataset.cpp",
+			null
+		]
+	],
+	"HEADER_EXTENSIONS" : [ "h", "hh", "h++", "hm", "hpp", "hxx", "in", "txx" ],
+	"INCLUDE_DIR" : "/home/wangying/desktop/ab_soft/zhangry/analysiscode_version6_2/JHS_ana_least_bk/JHS_ana/build2/test/graphgallery/graphgallery_autogen/include",
+	"MOC_COMPILATION_FILE" : "/home/wangying/desktop/ab_soft/zhangry/analysiscode_version6_2/JHS_ana_least_bk/JHS_ana/build2/test/graphgallery/graphgallery_autogen/mocs_compilation.cpp",
+	"MOC_DEFINITIONS" : 
+	[
+		"DEBUG",
+		"QT_CORE_LIB",
+		"QT_DATAVISUALIZATION_LIB",
+		"QT_GUI_LIB",
+		"QT_OPENGL_LIB",
+		"QT_WIDGETS_LIB"
+	],
+	"MOC_DEPEND_FILTERS" : 
+	[
+		[
+			"Q_PLUGIN_METADATA",
+			"[\n][ \t]*Q_PLUGIN_METADATA[ \t]*\\([^\\)]*FILE[ \t]*\"([^\"]+)\""
+		]
+	],
+	"MOC_INCLUDES" : 
+	[
+		"/home/wangying/desktop/ab_soft/zhangry/analysiscode_version6_2/JHS_ana_least_bk/JHS_ana/inc",
+		"/home/wangying/software/root-6.30.04-build/include",
+		"/home/wangying/software/fftw-3.3.10-build/include",
+		"/home/wangying/desktop/ab_soft/zhangry/analysiscode_version6_2/JHS_ana_least_bk/JHS_ana/gui/inc",
+		"/home/wangying/desktop/ab_soft/zhangry/analysiscode_version6_2/JHS_ana_least_bk/JHS_ana/gui/3rdparty",
+		"/home/wangying/desktop/ab_soft/zhangry/analysiscode_version6_2/JHS_ana_least_bk/JHS_ana/gui/3rdparty/dct",
+		"/home/wangying/desktop/ab_soft/zhangry/analysiscode_version6_2/JHS_ana_least_bk/JHS_ana/3rdparty",
+		"/home/wangying/software/qt6-cmake/include/QtCore",
+		"/home/wangying/software/qt6-cmake/include",
+		"/home/wangying/software/qt6-cmake/mkspecs/linux-g++",
+		"/home/wangying/software/qt6-cmake/include/QtGui",
+		"/home/wangying/software/qt6-cmake/include/QtWidgets",
+		"/home/wangying/software/qt6-cmake/include/QtDataVisualization",
+		"/home/wangying/software/qt6-cmake/include/QtOpenGL",
+		"/usr/include",
+		"/home/wangying/software/gcc-13.2.0-build/include/c++/13.2.0",
+		"/home/wangying/software/gcc-13.2.0-build/include/c++/13.2.0/x86_64-pc-linux-gnu",
+		"/home/wangying/software/gcc-13.2.0-build/include/c++/13.2.0/backward",
+		"/home/wangying/software/gcc-13.2.0-build/lib/gcc/x86_64-pc-linux-gnu/13.2.0/include",
+		"/usr/local/include",
+		"/home/wangying/software/gcc-13.2.0-build/include",
+		"/home/wangying/software/gcc-13.2.0-build/lib/gcc/x86_64-pc-linux-gnu/13.2.0/include-fixed/x86_64-linux-gnu",
+		"/home/wangying/software/gcc-13.2.0-build/lib/gcc/x86_64-pc-linux-gnu/13.2.0/include-fixed",
+		"/usr/include/x86_64-linux-gnu"
+	],
+	"MOC_MACRO_NAMES" : 
+	[
+		"Q_OBJECT",
+		"Q_GADGET",
+		"Q_NAMESPACE",
+		"Q_NAMESPACE_EXPORT",
+		"Q_GADGET_EXPORT",
+		"Q_ENUM_NS"
+	],
+	"MOC_OPTIONS" : [],
+	"MOC_PATH_PREFIX" : false,
+	"MOC_PREDEFS_CMD" : 
+	[
+		"/home/wangying/software/gcc-13.2.0-build/bin/g++",
+		"-std=gnu++20",
+		"-dM",
+		"-E",
+		"-c",
+		"/home/wangying/software/CMake-build/share/cmake-3.29/Modules/CMakeCXXCompilerABI.cpp"
+	],
+	"MOC_PREDEFS_FILE" : "/home/wangying/desktop/ab_soft/zhangry/analysiscode_version6_2/JHS_ana_least_bk/JHS_ana/build2/test/graphgallery/graphgallery_autogen/moc_predefs.h",
+	"MOC_RELAXED_MODE" : false,
+	"MOC_SKIP" : [],
+	"MULTI_CONFIG" : false,
+	"PARALLEL" : 12,
+	"PARSE_CACHE_FILE" : "/home/wangying/desktop/ab_soft/zhangry/analysiscode_version6_2/JHS_ana_least_bk/JHS_ana/build2/test/graphgallery/CMakeFiles/graphgallery_autogen.dir/ParseCache.txt",
+	"QT_MOC_EXECUTABLE" : "/home/wangying/software/qt6-cmake/libexec/moc",
+	"QT_UIC_EXECUTABLE" : "/home/wangying/software/qt6-cmake/libexec/uic",
+	"QT_VERSION_MAJOR" : 6,
+	"QT_VERSION_MINOR" : 8,
+	"SETTINGS_FILE" : "/home/wangying/desktop/ab_soft/zhangry/analysiscode_version6_2/JHS_ana_least_bk/JHS_ana/build2/test/graphgallery/CMakeFiles/graphgallery_autogen.dir/AutogenUsed.txt",
+	"SOURCES" : 
+	[
+		[
+			"/home/wangying/desktop/ab_soft/zhangry/analysiscode_version6_2/JHS_ana_least_bk/JHS_ana/test/graphgallery/axesinputhandler.cpp",
+			"MU",
+			null
+		],
+		[
+			"/home/wangying/desktop/ab_soft/zhangry/analysiscode_version6_2/JHS_ana_least_bk/JHS_ana/test/graphgallery/bargraph.cpp",
+			"MU",
+			null
+		],
+		[
+			"/home/wangying/desktop/ab_soft/zhangry/analysiscode_version6_2/JHS_ana_least_bk/JHS_ana/test/graphgallery/custominputhandler.cpp",
+			"MU",
+			null
+		],
+		[
+			"/home/wangying/desktop/ab_soft/zhangry/analysiscode_version6_2/JHS_ana_least_bk/JHS_ana/test/graphgallery/graphmodifier.cpp",
+			"MU",
+			null
+		],
+		[
+			"/home/wangying/desktop/ab_soft/zhangry/analysiscode_version6_2/JHS_ana_least_bk/JHS_ana/test/graphgallery/highlightseries.cpp",
+			"MU",
+			null
+		],
+		[
+			"/home/wangying/desktop/ab_soft/zhangry/analysiscode_version6_2/JHS_ana_least_bk/JHS_ana/test/graphgallery/main.cpp",
+			"MU",
+			null
+		],
+		[
+			"/home/wangying/desktop/ab_soft/zhangry/analysiscode_version6_2/JHS_ana_least_bk/JHS_ana/test/graphgallery/rainfalldata.cpp",
+			"MU",
+			null
+		],
+		[
+			"/home/wangying/desktop/ab_soft/zhangry/analysiscode_version6_2/JHS_ana_least_bk/JHS_ana/test/graphgallery/scatterdatamodifier.cpp",
+			"MU",
+			null
+		],
+		[
+			"/home/wangying/desktop/ab_soft/zhangry/analysiscode_version6_2/JHS_ana_least_bk/JHS_ana/test/graphgallery/scattergraph.cpp",
+			"MU",
+			null
+		],
+		[
+			"/home/wangying/desktop/ab_soft/zhangry/analysiscode_version6_2/JHS_ana_least_bk/JHS_ana/test/graphgallery/surfacegraph.cpp",
+			"MU",
+			null
+		],
+		[
+			"/home/wangying/desktop/ab_soft/zhangry/analysiscode_version6_2/JHS_ana_least_bk/JHS_ana/test/graphgallery/surfacegraphmodifier.cpp",
+			"MU",
+			null
+		],
+		[
+			"/home/wangying/desktop/ab_soft/zhangry/analysiscode_version6_2/JHS_ana_least_bk/JHS_ana/test/graphgallery/topographicseries.cpp",
+			"MU",
+			null
+		],
+		[
+			"/home/wangying/desktop/ab_soft/zhangry/analysiscode_version6_2/JHS_ana_least_bk/JHS_ana/test/graphgallery/variantbardatamapping.cpp",
+			"MU",
+			null
+		],
+		[
+			"/home/wangying/desktop/ab_soft/zhangry/analysiscode_version6_2/JHS_ana_least_bk/JHS_ana/test/graphgallery/variantbardataproxy.cpp",
+			"MU",
+			null
+		],
+		[
+			"/home/wangying/desktop/ab_soft/zhangry/analysiscode_version6_2/JHS_ana_least_bk/JHS_ana/test/graphgallery/variantdataset.cpp",
+			"MU",
+			null
+		]
+	],
+	"UIC_OPTIONS" : [],
+	"UIC_SEARCH_PATHS" : [],
+	"UIC_SKIP" : [],
+	"UIC_UI_FILES" : [],
+	"USE_BETTER_GRAPH" : true,
+	"VERBOSITY" : 0
+}

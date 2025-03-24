@@ -1,0 +1,5 @@
+set(__QT_DEPLOY_TARGET_draw_wave_FILE /home/wangying/desktop/ab_soft/zhangry/analysiscode_version6_2/JHS_ana_least_bk/JHS_ana/build2/script/draw_wave)
+set(__QT_DEPLOY_TARGET_draw_hitmap_FILE /home/wangying/desktop/ab_soft/zhangry/analysiscode_version6_2/JHS_ana_least_bk/JHS_ana/build2/script/draw_hitmap)
+set(__QT_DEPLOY_TARGET_draw_time_dis_FILE /home/wangying/desktop/ab_soft/zhangry/analysiscode_version6_2/JHS_ana_least_bk/JHS_ana/build2/script/draw_time_dis)
+set(__QT_DEPLOY_TARGET_graphgallery_FILE /home/wangying/desktop/ab_soft/zhangry/analysiscode_version6_2/JHS_ana_least_bk/JHS_ana/build2/test/graphgallery/graphgallery)
+set(__QT_DEPLOY_TARGET_JHS_FILE /home/wangying/desktop/ab_soft/zhangry/analysiscode_version6_2/JHS_ana_least_bk/JHS_ana/build2/JHS)

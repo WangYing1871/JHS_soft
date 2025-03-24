@@ -1,3 +1,4 @@
+#define info_out(X) std::cout<<"==> "<<__LINE__<<" "<<#X<<" |"<<(X)<<"|\n"
 /***************************************************************************
 **                                                                        **
 **  QCustomPlot, an easy to use, modern plotting widget for Qt            **
@@ -24,6 +25,8 @@
 ****************************************************************************/
 
 #include <iostream>
+#include <unordered_map>
+#include <string>
 #include "qcustomplot.h"
 
 
@@ -9506,6 +9509,16 @@ void QCPAxis::deselectEvent(bool *selectionStateChanged)
   if (selectionStateChanged)
     *selectionStateChanged = mSelectedParts != selBefore;
 }
+//---------------------------------------------------------------------
+void QCPAxis::inint_actions(){
+  m_right_button_menu = std::make_shared<QMenu>("axis_menu");
+  m_menu_actions.emplace("setRange",std::make_shared<QAction>("setRange",this));
+  //QObject::connect(m_menu_actions.at("setRange").get(),
+  //    ,this,)
+}
+
+//---------------------------------------------------------------------
+
 
 /*! \internal
   
@@ -9524,21 +9537,40 @@ void QCPAxis::deselectEvent(bool *selectionStateChanged)
 */
 void QCPAxis::mousePressEvent(QMouseEvent *event, const QVariant &details)
 {
-  Q_UNUSED(details)
-  if (!mParentPlot->interactions().testFlag(QCP::iRangeDrag) ||
-      !mAxisRect->rangeDrag().testFlag(orientation()) ||
-      !mAxisRect->rangeDragAxes(orientation()).contains(this))
-  {
-    event->ignore();
+  /* change by wangying FIXME */
+  if (event->button() & Qt::RightButton){
+    auto* menu = new QMenu("axis_menu");
+    //auto mouse_pos = event->globalPos();
+    auto mouse_pos = event->pos();
+    menu->setGeometry(mouse_pos.x(),mouse_pos.y(),100,100);
+    std::map<std::string,QAction*> actions;
+    actions.emplace("action0",new QAction("acction0",this));
+    actions.emplace("action1",new QAction("acction1",this));
+    actions.emplace("action2",new QAction("acction2",this));
+    for (auto&& [x,y] : actions) menu->addAction(y);
+    menu->show();
 
-    //std::cout<<__LINE__<< " point00\n";
 
-    return;
+    
   }
-  
+
+
+ // info_out("QCPAxis::mousePressEvent");
+ // Q_UNUSED(details)
+ // if (!mParentPlot->interactions().testFlag(QCP::iRangeDrag) ||
+ //     !mAxisRect->rangeDrag().testFlag(orientation()) ||
+ //     !mAxisRect->rangeDragAxes(orientation()).contains(this))
+ // {
+ //   event->ignore();
+
+ //   std::cout<<__LINE__<< " point00\n";
+
+ //   return;
+ // }
+ // 
   if (event->buttons() & Qt::LeftButton)
   {
-    //std::cout<<__LINE__<< " point01\n";
+    std::cout<<__LINE__<< " point01\n";
     mDragging = true;
     // initialize antialiasing backup in case we start dragging:
     if (mParentPlot->noAntialiasingOnDrag())
@@ -9628,11 +9660,14 @@ void QCPAxis::mouseReleaseEvent(QMouseEvent *event, const QPointF &startPos)
 void QCPAxis::wheelEvent(QWheelEvent *event)
 {
   // Mouse range zooming interaction:
+  
   if (!mParentPlot->interactions().testFlag(QCP::iRangeZoom) ||
       !mAxisRect->rangeZoom().testFlag(orientation()) ||
       !mAxisRect->rangeZoomAxes(orientation()).contains(this))
   {
     std::cout<<"point00\n";
+    //info_out(event->localPos().x());
+
     event->ignore();
     return;
   }
@@ -35536,5 +35571,47 @@ QVector<QPointF> QCPPolarGraph::dataToLines(const QVector<QCPGraphData> &data) c
   return result;
 }
 /* end of 'src/polar/polargraph.cpp' */
+//---------------------------------------------------------------------
+bool QCustomPlot::eventFilter(QObject* object, QEvent* event){
+  info_out("WWW");
+  if (object==dynamic_cast<QObject*>(xAxis)){
+    switch(event->type()){
+      case QEvent::Enter:
+        info_out("enter");
+        break;
+      case QEvent::Leave:
+        info_out("level");
+        break;
+      default:
+        break;
+
+    }
+    return QWidget::eventFilter(object,event);
+  }
+  if (object==dynamic_cast<QObject*>(yAxis)){
+    switch(event->type()){
+      case QEvent::Enter:
+        info_out("enter");
+        break;
+      case QEvent::Leave:
+        info_out("level");
+        break;
+      default:
+        break;
+
+    }
+    return QWidget::eventFilter(object,event);
+  }
 
 
+
+  return false;
+}
+
+void QCustomPlot::install_event_filter_axis(){
+  //info_out("invoked");
+  xAxis->installEventFilter(this);
+  yAxis->installEventFilter(this);
+  xAxis2->installEventFilter(this);
+  yAxis2->installEventFilter(this);
+}

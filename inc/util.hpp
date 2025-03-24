@@ -1,3 +1,8 @@
+//--------------------------------Stamp-------------------------------
+//^-^ Author: Zhi Heng           Email: 2835516101@qq.com     
+//^-^ Time: 2025-02-19 23:37:01   Posi: JW company@AnHui Soft.D
+//^-^ File: ../inc/util.hpp
+//--------------------------------------------------------------------
 #ifndef util_HPP
 #define util_HPP 1
 
@@ -15,6 +20,7 @@
 #include <unordered_map>
 #include <map>
 #include <vector>
+
 
 #define info_out(X) std::cout<<"==> "<<__LINE__<<" "<<#X<<" |"<<(X)<<"|\n"
 //#ifndef __CINT__
@@ -378,4 +384,114 @@ struct getopt{
 };
 }
 
+#include "fftw3.h"
+#include <complex>
+#include <cstdint>
+#include <functional>
+namespace util::fftw3{
+typedef std::complex<float> complexf_t;
+typedef std::vector<complexf_t> datac_array_t;
+template <class... _args>
+using filter_t = std::function<void(fftw_complex*,_args...)>;
+inline void scale(fftw_complex& v, double s=1.) {v[0]*=s, v[1]*=s;}
+
+//HOLY SHIT! why this function defined in head!?? I hate template
+template <class _iter_t, class... _args>
+datac_array_t fftw3_dft_and_idft(_iter_t first, _iter_t last
+    ,filter_t<_args...> filter
+    ,_args... params
+    /*,complexf_t* dft = nullptr*/){
+  /*
+  std::size_t n = std::distance(first,last);
+  auto* in = (fftw_complex*)fftw_malloc(sizeof(fftw_complex)*n);
+  std::size_t index=0;
+  for(auto iter=first; iter!=last; ++iter) in[index++][0] = *iter;
+  auto* out = (fftw_complex*)fftw_malloc(sizeof(fftw_complex)*n);
+  auto* out_in = (fftw_complex*)fftw_malloc(sizeof(fftw_complex)*n);
+  fftw_plan p0, p1;
+  p0 = fftw_plan_dft_1d(n,in,out,FFTW_FORWARD,FFTW_ESTIMATE);
+  p1 = fftw_plan_dft_1d(n,out,out_in,FFTW_BACKWARD,FFTW_ESTIMATE);
+  fftw_execute(p0);
+  for (int i=0; i<n; ++i) scale(out[i],1./(double)n);
+ // if (dft) for(int i=0; i<n; ++i) dft[i] = complexf_t(out[i][0],out[i][1]);
+  //std::invoke(filter,out,std::forward<_args>(params)...);
+  
+  //for (int i=5; i<n; ++i){
+  //  out[i][0] = 0;
+  //  out[i][1] = 0;
+  //}
+  
+  fftw_execute(p1);
+  datac_array_t ret(n);
+  for (int i=0; i<n; ++i) ret[i] = complexf_t(out_in[i][0],out_in[i][1]);
+  fftw_destroy_plan(p0);
+  fftw_destroy_plan(p1);
+  fftw_free(in);
+  fftw_free(out);
+  fftw_free(out_in);
+  return ret;
+  */
+    std::vector<double> data; for(auto iter = first; iter != last; ++iter) data.emplace_back(*iter);
+  int n = data.size();
+  auto* in = (fftw_complex*)fftw_malloc(sizeof(fftw_complex)*n);
+  for (std::size_t index=0; auto&& x : data) in[index++][0] = x;
+  auto* out = (fftw_complex*)fftw_malloc(sizeof(fftw_complex)*n);
+  auto* out_in = (fftw_complex*)fftw_malloc(sizeof(fftw_complex)*n);
+  fftw_plan p0, p1;
+  p0 = fftw_plan_dft_1d(n,in,out,FFTW_FORWARD,FFTW_ESTIMATE);
+  p1 = fftw_plan_dft_1d(n,out,out_in,FFTW_BACKWARD,FFTW_ESTIMATE);
+  fftw_execute(p0);
+
+  for (int i=0; i<n; ++i) scale(out[i],1./(double)n);
+  //if (dft) for(int i=0; i<n; ++i) dft[i] = complexf_t(out[i][0],out[i][1]);
+
+  //for(int i=0; i<n; ++i) info_out(out[i]);
+  
+  //scale(out[0],1./n);
+  //for (int i=0; i<=n/2; ++i)  scale(out[i],2./(double)n);
+  //for (int i=n/2+1; i<n; ++i) scale(out[i],0.);
+
+  //for (int i=10; i<n; ++i){
+  //  out[i][0] = 0;
+  //  out[i][1] = 0;
+  //}
+  for (int i=5; i<10; ++i){
+    out[i][0] = 0;
+    out[i][1] = 0;
+  }
+  for (int i=400; i<n; ++i){
+    out[i][0] = 0;
+    out[i][1] = 0;
+  }
+
+  fftw_execute(p1);
+  datac_array_t ret(n);
+  for (int i=0; i<n; ++i) ret[i] = complexf_t(out_in[i][0],out_in[i][1]);
+  fftw_destroy_plan(p0);
+  fftw_destroy_plan(p1);
+  fftw_free(in);
+  fftw_free(out);
+  fftw_free(out_in);
+  return ret;
+  
+}
+
+//JUst for test:
+//datac_array_t fftw3_dft_and_idft_FORTEST(std::vector<double> const& data,complexf_t* dft=nullptr);
+
+}
+
+#include <cmath>
+class TGraph;
+class TF1;
+namespace util::root{
+void get_t_graph_x_data(TGraph*, double*);
+void get_t_graph_y_data(TGraph*, double*);
+
+}
+
+namespace util::dct{
+void dft_forward(double* data, std::size_t sz,double* out_data);
+void dft_backward(double* data, std::size_t sz ,double* out_data);
+}
 #endif

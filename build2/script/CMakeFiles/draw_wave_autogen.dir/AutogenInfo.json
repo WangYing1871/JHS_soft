@@ -1,0 +1,111 @@
+{
+	"BUILD_DIR" : "/home/wangying/desktop/ab_soft/zhangry/analysiscode_version6_2/JHS_ana_least_bk/JHS_ana/build2/script/draw_wave_autogen",
+	"CMAKE_BINARY_DIR" : "/home/wangying/desktop/ab_soft/zhangry/analysiscode_version6_2/JHS_ana_least_bk/JHS_ana/build2",
+	"CMAKE_CURRENT_BINARY_DIR" : "/home/wangying/desktop/ab_soft/zhangry/analysiscode_version6_2/JHS_ana_least_bk/JHS_ana/build2/script",
+	"CMAKE_CURRENT_SOURCE_DIR" : "/home/wangying/desktop/ab_soft/zhangry/analysiscode_version6_2/JHS_ana_least_bk/JHS_ana/script",
+	"CMAKE_EXECUTABLE" : "/home/wangying/software/CMake-build/bin/cmake",
+	"CMAKE_LIST_FILES" : 
+	[
+		"/home/wangying/desktop/ab_soft/zhangry/analysiscode_version6_2/JHS_ana_least_bk/JHS_ana/script/CMakeLists.txt"
+	],
+	"CMAKE_SOURCE_DIR" : "/home/wangying/desktop/ab_soft/zhangry/analysiscode_version6_2/JHS_ana_least_bk/JHS_ana",
+	"CROSS_CONFIG" : false,
+	"DEP_FILE" : "/home/wangying/desktop/ab_soft/zhangry/analysiscode_version6_2/JHS_ana_least_bk/JHS_ana/build2/script/draw_wave_autogen/deps",
+	"DEP_FILE_RULE_NAME" : "draw_wave_autogen/timestamp",
+	"HEADERS" : 
+	[
+		[
+			"/home/wangying/desktop/ab_soft/zhangry/analysiscode_version6_2/JHS_ana_least_bk/JHS_ana/script/inc/util.h",
+			"MU",
+			"DIG64O274K/moc_util.cpp",
+			null
+		]
+	],
+	"HEADER_EXTENSIONS" : [ "h", "hh", "h++", "hm", "hpp", "hxx", "in", "txx" ],
+	"INCLUDE_DIR" : "/home/wangying/desktop/ab_soft/zhangry/analysiscode_version6_2/JHS_ana_least_bk/JHS_ana/build2/script/draw_wave_autogen/include",
+	"MOC_COMPILATION_FILE" : "/home/wangying/desktop/ab_soft/zhangry/analysiscode_version6_2/JHS_ana_least_bk/JHS_ana/build2/script/draw_wave_autogen/mocs_compilation.cpp",
+	"MOC_DEFINITIONS" : [ "DEBUG" ],
+	"MOC_DEPEND_FILTERS" : 
+	[
+		[
+			"Q_PLUGIN_METADATA",
+			"[\n][ \t]*Q_PLUGIN_METADATA[ \t]*\\([^\\)]*FILE[ \t]*\"([^\"]+)\""
+		]
+	],
+	"MOC_INCLUDES" : 
+	[
+		"/home/wangying/desktop/ab_soft/zhangry/analysiscode_version6_2/JHS_ana_least_bk/JHS_ana/inc",
+		"/home/wangying/software/root-6.30.04-build/include",
+		"/home/wangying/software/fftw-3.3.10-build/include",
+		"/home/wangying/desktop/ab_soft/zhangry/analysiscode_version6_2/JHS_ana_least_bk/JHS_ana/gui/inc",
+		"/home/wangying/desktop/ab_soft/zhangry/analysiscode_version6_2/JHS_ana_least_bk/JHS_ana/gui/3rdparty",
+		"/home/wangying/desktop/ab_soft/zhangry/analysiscode_version6_2/JHS_ana_least_bk/JHS_ana/gui/3rdparty/dct",
+		"/home/wangying/desktop/ab_soft/zhangry/analysiscode_version6_2/JHS_ana_least_bk/JHS_ana/3rdparty",
+		"/home/wangying/desktop/ab_soft/zhangry/analysiscode_version6_2/JHS_ana_least_bk/JHS_ana/script/inc",
+		"/home/wangying/software/gcc-13.2.0-build/include/c++/13.2.0",
+		"/home/wangying/software/gcc-13.2.0-build/include/c++/13.2.0/x86_64-pc-linux-gnu",
+		"/home/wangying/software/gcc-13.2.0-build/include/c++/13.2.0/backward",
+		"/home/wangying/software/gcc-13.2.0-build/lib/gcc/x86_64-pc-linux-gnu/13.2.0/include",
+		"/usr/local/include",
+		"/home/wangying/software/gcc-13.2.0-build/include",
+		"/home/wangying/software/gcc-13.2.0-build/lib/gcc/x86_64-pc-linux-gnu/13.2.0/include-fixed/x86_64-linux-gnu",
+		"/home/wangying/software/gcc-13.2.0-build/lib/gcc/x86_64-pc-linux-gnu/13.2.0/include-fixed",
+		"/usr/include/x86_64-linux-gnu",
+		"/usr/include"
+	],
+	"MOC_MACRO_NAMES" : 
+	[
+		"Q_OBJECT",
+		"Q_GADGET",
+		"Q_NAMESPACE",
+		"Q_NAMESPACE_EXPORT",
+		"Q_GADGET_EXPORT",
+		"Q_ENUM_NS"
+	],
+	"MOC_OPTIONS" : [],
+	"MOC_PATH_PREFIX" : false,
+	"MOC_PREDEFS_CMD" : 
+	[
+		"/home/wangying/software/gcc-13.2.0-build/bin/g++",
+		"-std=gnu++20",
+		"-dM",
+		"-E",
+		"-c",
+		"/home/wangying/software/CMake-build/share/cmake-3.29/Modules/CMakeCXXCompilerABI.cpp"
+	],
+	"MOC_PREDEFS_FILE" : "/home/wangying/desktop/ab_soft/zhangry/analysiscode_version6_2/JHS_ana_least_bk/JHS_ana/build2/script/draw_wave_autogen/moc_predefs.h",
+	"MOC_RELAXED_MODE" : false,
+	"MOC_SKIP" : [],
+	"MULTI_CONFIG" : false,
+	"PARALLEL" : 12,
+	"PARSE_CACHE_FILE" : "/home/wangying/desktop/ab_soft/zhangry/analysiscode_version6_2/JHS_ana_least_bk/JHS_ana/build2/script/CMakeFiles/draw_wave_autogen.dir/ParseCache.txt",
+	"QT_MOC_EXECUTABLE" : "/home/wangying/software/qt6-cmake/libexec/moc",
+	"QT_UIC_EXECUTABLE" : "/home/wangying/software/qt6-cmake/libexec/uic",
+	"QT_VERSION_MAJOR" : 6,
+	"QT_VERSION_MINOR" : 8,
+	"SETTINGS_FILE" : "/home/wangying/desktop/ab_soft/zhangry/analysiscode_version6_2/JHS_ana_least_bk/JHS_ana/build2/script/CMakeFiles/draw_wave_autogen.dir/AutogenUsed.txt",
+	"SOURCES" : 
+	[
+		[
+			"/home/wangying/desktop/ab_soft/zhangry/analysiscode_version6_2/JHS_ana_least_bk/JHS_ana/script/src/draw_wave.cpp",
+			"MU",
+			null
+		],
+		[
+			"/home/wangying/desktop/ab_soft/zhangry/analysiscode_version6_2/JHS_ana_least_bk/JHS_ana/script/src/util.cpp",
+			"MU",
+			null
+		],
+		[
+			"/home/wangying/desktop/ab_soft/zhangry/analysiscode_version6_2/JHS_ana_least_bk/JHS_ana/src/root_cint_out.cpp",
+			"MU",
+			null
+		]
+	],
+	"UIC_OPTIONS" : [],
+	"UIC_SEARCH_PATHS" : [],
+	"UIC_SKIP" : [],
+	"UIC_UI_FILES" : [],
+	"USE_BETTER_GRAPH" : true,
+	"VERBOSITY" : 0
+}

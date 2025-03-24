@@ -26,6 +26,9 @@
 #ifndef QCUSTOMPLOT_H
 #define QCUSTOMPLOT_H
 
+#include <memory>
+#include <unordered_map>
+#include <map>
 #include <QtCore/qglobal.h>
 
 // some Qt version/configuration dependent macros to include or exclude certain code paths:
@@ -102,6 +105,9 @@
 # if QT_VERSION >= QT_VERSION_CHECK(5, 2, 0)
 #  include <QtCore/QTimeZone>
 #endif
+
+class QMenu;
+class QAction;
 
 class QCPPainter;
 class QCustomPlot;
@@ -2413,6 +2419,16 @@ private:
   friend class QCustomPlot;
   friend class QCPGrid;
   friend class QCPAxisRect;
+
+private:
+  std::shared_ptr<QMenu> m_right_button_menu;
+  std::unordered_map<std::string,std::shared_ptr<QAction>> m_menu_actions;
+
+private:
+  void inint_actions();
+
+
+
 };
 Q_DECLARE_OPERATORS_FOR_FLAGS(QCPAxis::SelectableParts)
 Q_DECLARE_OPERATORS_FOR_FLAGS(QCPAxis::AxisTypes)
@@ -4052,6 +4068,12 @@ protected:
   friend class QCPAbstractPlottable;
   friend class QCPGraph;
   friend class QCPAbstractItem;
+
+protected:
+  bool eventFilter(QObject*,QEvent*) override;
+  
+public:
+  void install_event_filter_axis();
 };
 Q_DECLARE_METATYPE(QCustomPlot::LayerInsertMode)
 Q_DECLARE_METATYPE(QCustomPlot::RefreshPriority)

@@ -366,3 +366,72 @@ int getopt::run(int argc, char* argv[]){
 }
 }
 
+namespace util::fftw3{
+//datac_array_t fftw3_dft_and_idft(std::vector<double> const& data
+//    ,complexf_t* dft){
+//  int n = data.size();
+//  auto* in = (fftw_complex*)fftw_malloc(sizeof(fftw_complex)*n);
+//  for (std::size_t index=0; auto&& x : data) in[index++][0] = x;
+//  auto* out = (fftw_complex*)fftw_malloc(sizeof(fftw_complex)*n);
+//  auto* out_in = (fftw_complex*)fftw_malloc(sizeof(fftw_complex)*n);
+//  fftw_plan p0, p1;
+//  p0 = fftw_plan_dft_1d(n,in,out,FFTW_FORWARD,FFTW_ESTIMATE);
+//  p1 = fftw_plan_dft_1d(n,out,out_in,FFTW_BACKWARD,FFTW_ESTIMATE);
+//  fftw_execute(p0);
+//  for (int i=0; i<n; ++i) scale(out[i],1./(double)n);
+//  if (dft) for(int i=0; i<n; ++i) dft[i] = complexf_t(out[i][0],out[i][1]);
+//  for (int i=5; i<n; ++i){
+//    out[i][0] = 0;
+//    out[i][1] = 0;
+//  }
+//
+//  fftw_execute(p1);
+//  datac_array_t ret(n);
+//  for (int i=0; i<n; ++i) ret[i] = complexf_t(out_in[i][0],out_in[i][1]);
+//  fftw_destroy_plan(p0);
+//  fftw_destroy_plan(p1);
+//  fftw_free(in);
+//  fftw_free(out);
+//  fftw_free(out_in);
+//  return ret;
+//
+//}
+}
+
+#include "TGraph.h"
+#include "TF1.h"
+namespace util::root{
+void get_t_graph_x_data(TGraph* grp, double* dest){
+  if (!grp || !dest) return;
+  double dummy;
+  for (int i=0; i<grp->GetN(); ++i) grp->GetPoint(i,*dest++,dummy); }
+void get_t_graph_y_data(TGraph* grp, double* dest){
+  if (!grp || !dest) return;
+  double dummy;
+  for (int i=0; i<grp->GetN(); ++i) grp->GetPoint(i,dummy,*dest++);
+}
+
+
+
+
+}
+
+#include "DCT.h"
+#include "FFT.h"
+namespace util::dct{
+void dft_forward(double* data, std::size_t sz
+    ,double* out_data){
+  dArray1D tab(sz);
+  for (int i=0; i<sz; ++i) tab.setAt(i,data[i]);
+  DCT::Forward(&tab);
+  if (out_data) for (int i=0; i<sz; ++i) out_data[i] = tab.getAt(i);
+}
+void dft_backward(double* data, std::size_t sz
+    ,double* out_data){
+  dArray1D tab(sz);
+  for (int i=0; i<sz; ++i) tab.setAt(i,data[i]);
+  DCT::Inverse(&tab);
+  if (out_data) for (int i=0; i<sz; ++i) out_data[i] = tab.getAt(i);
+}
+  
+}
